@@ -1,4 +1,5 @@
-# sus_editor
+# Sus Editor
+
 Camera movement editor
 
 # Quick Start
@@ -11,4 +12,5 @@ $ python3 main.py
 ```
 
 ## Inspire
+
 ded editor: https://github.com/tsoding/ded
