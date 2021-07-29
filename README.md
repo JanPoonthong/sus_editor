@@ -1,7 +1,5 @@
 # Sus Editor
 
-Camera movement editor
-
 # Quick Start
 
 ## Linux
