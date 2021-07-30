@@ -12,3 +12,7 @@ $ python3 main.py
 ## Inspire
 
 ded editor: https://github.com/tsoding/ded
+
+## Font
+
+domsson-fontgen: https://github.com/tsoding/domsson-fontgen
