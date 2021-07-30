@@ -1,23 +1,31 @@
-from sdl2 import *
 import ctypes
-from ctypes import CDLL, byref
-from font import *
-import os
+
+from sdl2 import *
+from sdl2.sdlimage import *
+
+
+def scc(code):
+    if code < 0:
+        print(f"SDL ERROR: {SDL_GetError()}")
+        exit(1)
+
+
+def scp(ptr):
+    if ptr == 0:
+        print(f"SDL ERROR: {SDL_GetError()}")
+        exit(1)
+    return ptr
 
 
 def surface_from_file(file_path):
-    width, height, n, STBI_rgb_alpha = 0, 0, 0, 4
-    project_directory = os.path.dirname(os.path.abspath(__file__))
-    stb_image = CDLL(os.path.join(project_directory, "stb_image.so"))
-    pixels = stb_image.stbi_load(file_path, width, height, n, STBI_rgb_alpha)
+    IMG_Init(IMG_INIT_PNG)
+    width, height = 0, 0
+    pixels = IMG_Load(file_path)
 
-    if pixels == None:
-        print(
-            f"ERROR: couldn't load the file {file_path}: {stb_image.stbi_failure_reason()}"
-        )
+    if not pixels:
+        print(f"IMG_Load ERROR: {IMG_GetError()}")
         exit(1)
 
-    rmask, gmask, bmask, amask = 0, 0, 0, 0
     if SDL_BYTEORDER == SDL_BIG_ENDIAN:
         rmask = 0xFF000000
         gmask = 0x00FF0000
@@ -31,9 +39,12 @@ def surface_from_file(file_path):
 
     depth = 32
     pitch = 4 * width
-    return SDL_CreateRGBSurfaceFrom(
-        pixels, width, height, depth, pitch, rmask, gmask, bmask, amask
+    scp(
+        SDL_CreateRGBSurfaceFrom(
+            pixels, width, height, depth, pitch, rmask, gmask, bmask, amask
+        )
     )
+    return pixels
 
 
 def main():
@@ -41,9 +52,12 @@ def main():
     window = SDL_CreateWindow(
         b"Sus Editor", 0, 0, 800, 600, SDL_WINDOW_RESIZABLE
     )
-    renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED)
+    renderer = scp(SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED))
 
-    font_surface = surface_from_file("./charmap-oldschool_white.png")
+    font_surface = surface_from_file(b"charmap-oldschool_white.png")
+    font_texture = scp(SDL_CreateTextureFromSurface(renderer, font_surface))
+    font_rect = SDL_Rect(x=0, y=0, w=128, h=64)
+
     running = True
     while running:
         event = SDL_Event()
@@ -51,11 +65,13 @@ def main():
             if event.type == SDL_QUIT:
                 running = False
                 break
-        SDL_SetRenderDrawColor(renderer, 0, 255, 255, 0)
-        SDL_RenderClear(renderer)
+        scc(SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0))
+        scc(SDL_RenderClear(renderer))
+        scc(SDL_RenderCopy(renderer, font_texture, font_rect, font_rect))
         SDL_RenderPresent(renderer)
     SDL_Quit()
     return 0
 
 
-main()
+if __name__ == "__main__":
+    main()
