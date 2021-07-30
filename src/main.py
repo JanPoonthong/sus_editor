@@ -20,9 +20,9 @@ def scp(ptr):
 def surface_from_file(file_path):
     IMG_Init(IMG_INIT_PNG)
     width, height = 0, 0
-    pixels = IMG_Load(file_path)
+    data = IMG_Load(file_path)
 
-    if not pixels:
+    if not data:
         print(f"IMG_Load ERROR: {IMG_GetError()}")
         exit(1)
 
@@ -41,10 +41,10 @@ def surface_from_file(file_path):
     pitch = 4 * width
     scp(
         SDL_CreateRGBSurfaceFrom(
-            pixels, width, height, depth, pitch, rmask, gmask, bmask, amask
+            data, width, height, depth, pitch, rmask, gmask, bmask, amask
         )
     )
-    return pixels
+    return data
 
 
 def main():
