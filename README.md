@@ -5,8 +5,7 @@
 ## Linux
 
 ```console
-$ pip3 install PySDL2
-$ pip3 install pysdl2-dll
+$ pip3 install -r requirements.txt
 $ python3 main.py
 ```
 
