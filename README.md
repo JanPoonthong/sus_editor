@@ -6,6 +6,7 @@
 
 ```console
 $ pip3 install PySDL2
+$ pip3 install pysdl2-dll
 $ python3 main.py
 ```
 
