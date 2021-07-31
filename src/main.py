@@ -19,32 +19,12 @@ def scp(ptr):
 
 def surface_from_file(file_path):
     IMG_Init(IMG_INIT_PNG)
-    width, height = 0, 0
     data = IMG_Load(file_path)
 
     if not data:
         print(f"IMG_Load ERROR: {IMG_GetError()}")
         exit(1)
-
-    if SDL_BYTEORDER == SDL_BIG_ENDIAN:
-        rmask = 0xFF000000
-        gmask = 0x00FF0000
-        bmask = 0x0000FF00
-        amask = 0x000000FF
-    else:
-        rmask = 0x000000FF
-        gmask = 0x0000FF00
-        bmask = 0x00FF0000
-        amask = 0xFF000000
-
-    depth = 32
-    pitch = 4 * width
-    scp(
-        SDL_CreateRGBSurfaceFrom(
-            data, width, height, depth, pitch, rmask, gmask, bmask, amask
-        )
-    )
-    return data
+    return data.contents
 
 
 def main():
@@ -56,7 +36,7 @@ def main():
 
     font_surface = surface_from_file(b"charmap-oldschool_white.png")
     font_texture = scp(SDL_CreateTextureFromSurface(renderer, font_surface))
-    font_rect = SDL_Rect(x=0, y=0, w=128, h=64)
+    font_rect = SDL_Rect(x=0, y=0, w=font_surface.w, h=font_surface.h)
 
     running = True
     while running:
@@ -67,7 +47,10 @@ def main():
                 break
         scc(SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0))
         scc(SDL_RenderClear(renderer))
-        scc(SDL_RenderCopy(renderer, font_texture, font_rect, font_rect))
+        output_rect = SDL_Rect(
+            x=0, y=0, w=font_surface.w * 5, h=font_surface.h * 5
+        )
+        scc(SDL_RenderCopy(renderer, font_texture, font_rect, output_rect))
         SDL_RenderPresent(renderer)
     SDL_Quit()
     return 0
