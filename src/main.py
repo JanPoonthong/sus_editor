@@ -61,8 +61,11 @@ def render_char(renderer, font, c, x, y, color, scale):
 
     SDL_SetTextureColorMod(
         font,
+        # 2 left digits -> R
         color >> (8 * 2) & 0xFF,
+        # 2 middle digits -> G
         color >> (8 * 1) & 0xFF,
+        # 2 right digits -> B
         color >> (8 * 0) & 0xFF,
     )
 
