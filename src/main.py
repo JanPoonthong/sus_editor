@@ -1,4 +1,5 @@
 import ctypes
+import sys
 
 from sdl2 import *
 from sdl2.sdlimage import *
@@ -7,23 +8,27 @@ from sdl2.sdlimage import *
 def scc(code):
     if code < 0:
         print(f"SDL ERROR: {SDL_GetError()}")
-        exit(1)
+        sys.exit(1)
 
 
 def scp(ptr):
     if ptr == 0:
         print(f"SDL ERROR: {SDL_GetError()}")
-        exit(1)
+        sys.exit(1)
     return ptr
 
 
 def surface_from_file(file_path):
+    """
+    :param file_path: Accept file name as a string
+    :return data.contents: As SDL_Surface object
+    """
     IMG_Init(IMG_INIT_PNG)
     data = IMG_Load(file_path)
 
     if not data:
         print(f"IMG_Load ERROR: {IMG_GetError()}")
-        exit(1)
+        sys.exit(1)
     return data.contents
 
 
