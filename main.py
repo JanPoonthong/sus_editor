@@ -55,14 +55,38 @@ def font_object():
     return font
 
 
-    src = SDL_Rect(
-        x=int(col * FONT_CHAR_WIDTH),
-        y=int(row * FONT_CHAR_HEIGHT),
-        w=int(FONT_CHAR_WIDTH),
-        h=int(FONT_CHAR_HEIGHT),
+def font_load_from_file(renderer, file_path):
+    font = font_object()
+
+    font_surface = surface_from_file(file_path)
+    font["spritesheet"] = scp(
+        SDL_CreateTextureFromSurface(renderer, font_surface)
     )
 
-    # Output display
+    SDL_FreeSurface(font_surface)
+
+    for asci in range(ACSII_DISPLAY_LOW, ACSII_DISPLAY_HIGH):
+        # print(f"ASCII: {asci}, {ACSII_DISPLAY_HIGH - ACSII_DISPLAY_LOW}")
+        index = asci - ACSII_DISPLAY_LOW
+        # print(f"Index: {chr(index)} -> {index} - 32 = {index - 32}")
+        # Get each letters in which col -> know col
+        col = int(index % FONT_COLS)
+        # print(f"Index: {index} % {FONT_COLS} = Col {col}")
+        # Get each letters in which row -> know row
+        row = int(index / FONT_COLS)
+        # print(f"Index: {index} / {FONT_COLS} = Row {row}")
+        font["glyph_table"][index] = SDL_Rect(
+            x=int(col * FONT_CHAR_WIDTH),
+            y=int(row * FONT_CHAR_HEIGHT),
+            w=int(FONT_CHAR_WIDTH),
+            h=int(FONT_CHAR_HEIGHT),
+        )
+        # print(chr(asci), font["glyph_table"][index])
+
+    return font
+
+
+def render_char(renderer, font, c, x, y, scale):
     dst = SDL_Rect(
         x=int(x),
         y=int(y),
@@ -70,8 +94,21 @@ def font_object():
         h=int(FONT_CHAR_HEIGHT * scale),
     )
 
+    assert c >= ACSII_DISPLAY_LOW
+    assert c <= ACSII_DISPLAY_HIGH
+    index = c - ACSII_DISPLAY_LOW
+    # print(index, c, chr(c), font["glyph_table"][index])
+
+    scc(
+        SDL_RenderCopy(
+            renderer, font["spritesheet"], font["glyph_table"][index], dst
+        )
+    )
+
+
+def renderer_text(renderer, font, text, x, y, color, scale):
     SDL_SetTextureColorMod(
-        font,
+        font["spritesheet"],
         # 2 left digits -> R
         color >> (8 * 2) & 0xFF,
         # 2 middle digits -> G
@@ -80,12 +117,10 @@ def font_object():
         color >> (8 * 0) & 0xFF,
     )
 
-    scc(SDL_RenderCopy(renderer, font, src, dst))
+    scc(SDL_SetTextureAlphaMod(font["spritesheet"], color >> (8 * 3) & 0xFF))
 
-
-def renderer_text(renderer, font, text, x, y, color, scale):
     for i in range(len(text)):
-        render_char(renderer, font, text[i], x, y, color, scale)
+        render_char(renderer, font, text[i], x, y, scale)
         x += FONT_CHAR_WIDTH * scale
     return True
 
@@ -97,8 +132,7 @@ def main():
     )
     renderer = scp(SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED))
 
-    font_surface = surface_from_file(b"charmap-oldschool_white.png")
-    font_texture = scp(SDL_CreateTextureFromSurface(renderer, font_surface))
+    font = font_load_from_file(renderer, b"charmap-oldschool_white.png")
 
     text_render_completed = False
     while True:
@@ -107,11 +141,13 @@ def main():
             if event.type == SDL_QUIT:
                 break
             else:
-                if text_render_completed is not True:
-                    text_render_completed = renderer_text(
-                        renderer, font_texture, b"Jan Poonthong", 0, 0, 0x00FFFF, 5
-                    )
-                    SDL_RenderPresent(renderer)
+                scc(SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0))
+                scc(SDL_RenderClear(renderer))
+                # if text_render_completed is not True:
+                text_render_completed = renderer_text(
+                    renderer, font, b"Jan Poonthong", 0, 0, 0x00FFFF, 5
+                )
+                SDL_RenderPresent(renderer)
     SDL_Quit()
     return 0
 
