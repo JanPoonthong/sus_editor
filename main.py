@@ -11,6 +11,10 @@ FONT_ROWS = 7
 FONT_CHAR_WIDTH = FONT_WIDTH / FONT_COLS
 FONT_CHAR_HEIGHT = FONT_HEIGHT / FONT_ROWS
 
+ACSII_DISPLAY_LOW = 32
+# TODO(jan): Maybe 126
+ACSII_DISPLAY_HIGH = 127
+
 
 def scc(code):
     if code < 0:
@@ -39,10 +43,17 @@ def surface_from_file(file_path):
     return data.contents
 
 
-def render_char(renderer, font, c, x, y, color, scale):
-    index = c - 32
-    col = int(index % FONT_COLS)
-    row = int(index / FONT_COLS)
+def font_object():
+    """
+    Create black SDL_Texture and 95 of free list space
+    :return dict
+    """
+    font = {
+        "spritesheet": SDL_Texture(),
+        "glyph_table": [0] * (ACSII_DISPLAY_HIGH - ACSII_DISPLAY_LOW),
+    }
+    return font
+
 
     src = SDL_Rect(
         x=int(col * FONT_CHAR_WIDTH),
