@@ -93,7 +93,7 @@ def main():
     text_render_completed = False
     while running:
         event = scp(SDL_Event())
-        while SDL_PollEvent(ctypes.byref(event)) != 0:
+        if SDL_PollEvent(ctypes.byref(event)) != 0:
             if event.type == SDL_QUIT:
                 running = False
                 break
