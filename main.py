@@ -15,6 +15,19 @@ ACSII_DISPLAY_LOW = 32
 # TODO(jan): Maybe 126
 ACSII_DISPLAY_HIGH = 127
 
+SCREEN_POS_X, SCREEN_POS_Y = 1920 // 2, 1080 // 2
+
+
+class SDL_Rect_Ascii(Structure):
+    _fields_ = [("x", c_int), ("y", c_int), ("w", c_int), ("h", c_int)]
+
+    def __init__(self, x=0, y=0, w=0, h=0):
+        super(SDL_Rect_Ascii, self).__init__()
+        self.x = x
+        self.y = y
+        self.w = w
+        self.h = h
+
 
 def scc(code):
     if code < 0:
@@ -128,7 +141,12 @@ def renderer_text(renderer, font, text, x, y, color, scale):
 def main():
     scc(SDL_Init(SDL_INIT_VIDEO))
     window = SDL_CreateWindow(
-        b"Sus Editor", 0, 0, 800, 600, SDL_WINDOW_RESIZABLE
+        b"Sus Editor",
+        SCREEN_POS_X,
+        SCREEN_POS_Y,
+        800,
+        600,
+        SDL_WINDOW_RESIZABLE,
     )
     renderer = scp(SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED))
 
