@@ -73,6 +73,7 @@ def render_char(renderer, font, c, x, y, color, scale):
 
 
 def renderer_text(renderer, font, text, x, y, color, scale):
+    #TODO(jan): Write a docs-string
     for i in range(len(text)):
         render_char(renderer, font, text[i], x, y, color, scale)
         x += FONT_CHAR_WIDTH * scale
