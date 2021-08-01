@@ -89,13 +89,11 @@ def main():
     font_surface = surface_from_file(b"charmap-oldschool_white.png")
     font_texture = scp(SDL_CreateTextureFromSurface(renderer, font_surface))
 
-    running = True
     text_render_completed = False
-    while running:
+    while True:
         event = scp(SDL_Event())
         if SDL_PollEvent(ctypes.byref(event)) != 0:
             if event.type == SDL_QUIT:
-                running = False
                 break
             else:
                 if text_render_completed is not True:
