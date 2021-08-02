@@ -4,6 +4,8 @@ import sys
 import sdl2.sdlimage
 from sdl2 import *
 
+from sdl_rect_ascii import SdlRectAscii
+
 FONT_WIDTH = 128
 FONT_HEIGHT = 64
 FONT_COLS = 18
@@ -17,19 +19,9 @@ ACSII_DISPLAY_HIGH = 127
 
 SCREEN_WIDTH = 800
 SCREEN_HEIGHT = 600
-SCREEN_POS_X, SCREEN_POS_Y = (1920 - SCREEN_WIDTH) // 2, (1080 - SCREEN_HEIGHT) // 2
-
-
-class SdlRectAscii:
-    def __init__(self, x, y, w, h, asci):
-        self.rect = SDL_Rect(x, y, w, h)
-        self.asci = asci
-
-    def return_lp_sdl_rect(self):
-        return self.rect
-
-    def __repr__(self):
-        return f"SDL_Rect(x={self.rect.x}, y={self.rect.y}, w={self.rect.w}, h={self.rect.h}, ascii={chr(self.asci)})"
+SCREEN_POS_X, SCREEN_POS_Y = (1920 - SCREEN_WIDTH) // 2, (
+    1080 - SCREEN_HEIGHT
+) // 2
 
 
 def scc(code):
@@ -90,22 +82,19 @@ def font_load_from_file(renderer, file_path):
         # Get each letters in which row -> know row
         row = int(index / FONT_COLS)
         # print(f"Index: {index} / {FONT_COLS} = Row {row}")
+
         font["glyph_table"][index] = SdlRectAscii(
             x=int(col * FONT_CHAR_WIDTH),
             y=int(row * FONT_CHAR_HEIGHT),
             w=int(FONT_CHAR_WIDTH),
             h=int(FONT_CHAR_HEIGHT),
-            asci=index,
-        ).return_lp_sdl_rect()
-        # FIXME(jan): expected LP_SDL_Rect instance instead of SDL_Rect_Ascii"""
-        # FIXME(jan): expected: <class 'sdl2.rect.SDL_Rect'>"""
-        # FIXME(jan): value: <class '__main__.SDL_Rect_Ascii'>"""
-        # print(SDL_Rect_Ascii(0, 0, 0, 0, 33))
-        print(
-            chr(asci),
-            type(font["glyph_table"][index]),
-            font["glyph_table"][index],
+            asci=asci,
         )
+        # print(
+        #     asci,
+        #     type(font["glyph_table"][index]),
+        #     font["glyph_table"][index],
+        # )
 
     return font
 
@@ -125,7 +114,10 @@ def render_char(renderer, font, c, x, y, scale):
 
     scc(
         SDL_RenderCopy(
-            renderer, font["spritesheet"], font["glyph_table"][index], dst
+            renderer,
+            font["spritesheet"],
+            font["glyph_table"][index].get_lp_sdl_rect,
+            dst,
         )
     )
 
