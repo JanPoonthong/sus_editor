@@ -107,6 +107,7 @@ def render_char(renderer, font, c, x, y, scale):
         h=int(FONT_CHAR_HEIGHT * scale),
     )
 
+    # print(c)
     assert c >= ACSII_DISPLAY_LOW
     assert c <= ACSII_DISPLAY_HIGH
     index = c - ACSII_DISPLAY_LOW
@@ -122,7 +123,7 @@ def render_char(renderer, font, c, x, y, scale):
     )
 
 
-def renderer_text(renderer, font, text, x, y, color, scale):
+def renderer_text_sized(renderer, font, text, text_size, x, y, color, scale):
     SDL_SetTextureColorMod(
         font["spritesheet"],
         # 2 left digits -> R
@@ -135,10 +136,14 @@ def renderer_text(renderer, font, text, x, y, color, scale):
 
     scc(SDL_SetTextureAlphaMod(font["spritesheet"], color >> (8 * 3) & 0xFF))
 
-    for i in range(len(text)):
-        render_char(renderer, font, text[i], x, y, scale)
+    for i in range(text_size):
+        render_char(renderer, font, ord(text[i]), x, y, scale)
         x += FONT_CHAR_WIDTH * scale
     return True
+
+
+def renderer_text(renderer, font, text, x, y, color, scale):
+    renderer_text_sized(renderer, font, text, len(text), x, y, color, scale)
 
 
 def main():
@@ -156,17 +161,45 @@ def main():
 
     font = font_load_from_file(renderer, b"charmap-oldschool_white.png")
 
+    buffer_capacity = 5
+    buffer = []
+    buffer_size = 0
     while True:
         event = scp(SDL_Event())
         if SDL_PollEvent(ctypes.byref(event)) != 0:
             if event.type == SDL_QUIT:
                 break
             else:
+                if SDL_TEXTINPUT:
+                    # 1 -> char, 0 -> nothing
+                    text_size = len(event.text.text)
+                    # It minus all the time
+                    free_space = buffer_capacity - buffer_size
+                    try:
+                        text = event.text.text.decode("utf-8")
+                        if text == "":
+                            pass
+                        elif (
+                            text
+                            in "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ!@#$%^&*()\"'`-+?_=,<>/1234567890"
+                        ):
+                            if text_size > free_space:
+                                text_size = free_space
+                            if free_space == 0:
+                                pass
+                            else:
+                                buffer.append(text)
+                                buffer_size += text_size
+                        else:
+                            pass
+                    except UnicodeDecodeError:
+                        pass
+
                 scc(SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0))
                 scc(SDL_RenderClear(renderer))
-                # TODO(jan): I should only render the text once
-                renderer_text(
-                    renderer, font, b"Jan Poonthong", 0, 0, 0x00FFFF, 5
+                print(buffer)
+                renderer_text_sized(
+                    renderer, font, buffer, buffer_size, 0, 0, 0x00FFFF, 8
                 )
                 SDL_RenderPresent(renderer)
     SDL_Quit()
