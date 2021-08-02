@@ -15,7 +15,9 @@ ACSII_DISPLAY_LOW = 32
 # TODO(jan): Maybe 126
 ACSII_DISPLAY_HIGH = 127
 
-SCREEN_POS_X, SCREEN_POS_Y = (1920 - 800) // 2, (1080 - 600) // 2
+SCREEN_WIDTH = 800
+SCREEN_HEIGHT = 600
+SCREEN_POS_X, SCREEN_POS_Y = (1920 - SCREEN_WIDTH) // 2, (1080 - SCREEN_HEIGHT) // 2
 
 
 class SdlRectAscii:
@@ -154,8 +156,8 @@ def main():
         b"Sus Editor",
         SCREEN_POS_X,
         SCREEN_POS_Y,
-        800,
-        600,
+        SCREEN_WIDTH,
+        SCREEN_HEIGHT,
         SDL_WINDOW_RESIZABLE,
     )
     renderer = scp(SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED))
