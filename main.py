@@ -21,7 +21,7 @@ ACSII_DISPLAY_HIGH = 127
 SCREEN_WIDTH = 800
 SCREEN_HEIGHT = 600
 SCREEN_POS_X, SCREEN_POS_Y = (1920 - SCREEN_WIDTH) // 2, (
-        1080 - SCREEN_HEIGHT
+    1080 - SCREEN_HEIGHT
 ) // 2
 
 
@@ -173,32 +173,28 @@ def main():
         if SDL_PollEvent(ctypes.byref(event)) != 0:
             if event.type == SDL_QUIT:
                 break
-            else:
-                if SDL_TEXTINPUT:
-                    # 1 -> char, 0 -> nothing
-                    text_size = len(event.text.text)
-                    # It minus all the time
-                    free_space = buffer_capacity - buffer_size
-                    try:
-                        text = event.text.text.decode("utf-8")
-                        if text != "" and text in string.ascii_letters + string.punctuation + string.digits:
-                            if text_size > free_space:
-                                text_size = free_space
-                            if free_space == 0:
-                                pass
-                            else:
-                                buffer.append(text)
-                                buffer_size += text_size
-                        else:
-                            pass
-                    except UnicodeDecodeError:
-                        pass
+            elif SDL_TEXTINPUT:
+                try:
+                    text = event.text.text.decode("utf-8")
+                except UnicodeDecodeError:
+                    pass
+
+                free_space = buffer_capacity - buffer_size
+                if (
+                    text != ""
+                    and text
+                    in string.ascii_letters + string.punctuation + string.digits
+                ):
+                    if free_space != 0:
+                        buffer.append(text)
+                        buffer_size += 1
 
                 scc(SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0))
                 scc(SDL_RenderClear(renderer))
-                renderer_text_sized(
-                    renderer, font, buffer, buffer_size, 0, 0, 0x00FFFF, 5
-                )
+                if len(buffer) != 0 and buffer_size != 0:
+                    renderer_text_sized(
+                        renderer, font, buffer, buffer_size, 0, 0, 0x00FFFF, 5
+                    )
                 SDL_RenderPresent(renderer)
     SDL_Quit()
     return 0
