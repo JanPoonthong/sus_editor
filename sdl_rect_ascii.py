@@ -8,7 +8,7 @@ class SdlRectAscii:
 
     def __init__(self, x, y, w, h, asci):
         self.get_lp_sdl_rect = SDL_Rect(x, y, w, h)
-        self.asci = asci
+        self.asci = chr(asci)
 
     def __repr__(self):
-        return f"SDL_Rect(x={self.get_lp_sdl_rect.x}, y={self.get_lp_sdl_rect.y}, w={self.get_lp_sdl_rect.w}, h={self.get_lp_sdl_rect.h}, ascii={chr(self.asci)})"
+        return f"SDL_Rect(x={self.get_lp_sdl_rect.x}, y={self.get_lp_sdl_rect.y}, w={self.get_lp_sdl_rect.w}, h={self.get_lp_sdl_rect.h}, ascii={self.asci})"
