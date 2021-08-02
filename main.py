@@ -1,4 +1,5 @@
 import ctypes
+import string
 import sys
 
 import sdl2.sdlimage
@@ -20,7 +21,7 @@ ACSII_DISPLAY_HIGH = 127
 SCREEN_WIDTH = 800
 SCREEN_HEIGHT = 600
 SCREEN_POS_X, SCREEN_POS_Y = (1920 - SCREEN_WIDTH) // 2, (
-    1080 - SCREEN_HEIGHT
+        1080 - SCREEN_HEIGHT
 ) // 2
 
 
@@ -63,6 +64,9 @@ def font_object():
 
 
 def font_load_from_file(renderer, file_path):
+    """
+    :return dict
+    """
     font = font_object()
 
     font_surface = surface_from_file(file_path)
@@ -161,7 +165,6 @@ def main():
 
     font = font_load_from_file(renderer, b"charmap-oldschool_white.png")
 
-    #TODO(jan): 5
     buffer_capacity = 1024
     buffer = []
     buffer_size = 0
@@ -178,12 +181,7 @@ def main():
                     free_space = buffer_capacity - buffer_size
                     try:
                         text = event.text.text.decode("utf-8")
-                        if text == "":
-                            pass
-                        elif (
-                            text
-                            in "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ!@#$%^&*()\"'`-+?_=,<>/1234567890"
-                        ):
+                        if text != "" and text in string.ascii_letters + string.punctuation + string.digits:
                             if text_size > free_space:
                                 text_size = free_space
                             if free_space == 0:
@@ -198,9 +196,8 @@ def main():
 
                 scc(SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0))
                 scc(SDL_RenderClear(renderer))
-                print(buffer)
                 renderer_text_sized(
-                    renderer, font, buffer, buffer_size, 0, 0, 0x00FFFF, 8
+                    renderer, font, buffer, buffer_size, 0, 0, 0x00FFFF, 5
                 )
                 SDL_RenderPresent(renderer)
     SDL_Quit()
