@@ -18,16 +18,16 @@ ACSII_DISPLAY_HIGH = 127
 SCREEN_POS_X, SCREEN_POS_Y = (1920 - 800) // 2, (1080 - 600) // 2
 
 
-class SDL_Rect_Ascii(Structure):
-    _fields_ = [("x", c_int), ("y", c_int), ("w", c_int), ("h", c_int)]
-
-    def __init__(self, x=0, y=0, w=0, h=0, asci=0):
-        super(SDL_Rect_Ascii, self).__init__()
-        self.x = x
-        self.y = y
-        self.w = w
-        self.h = h
+class SdlRectAscii:
+    def __init__(self, x, y, w, h, asci):
+        self.rect = SDL_Rect(x, y, w, h)
         self.asci = asci
+
+    def return_lp_sdl_rect(self):
+        return self.rect
+
+    def __repr__(self):
+        return f"SDL_Rect(x={self.rect.x}, y={self.rect.y}, w={self.rect.w}, h={self.rect.h}, ascii={chr(self.asci)})"
 
 
 def scc(code):
