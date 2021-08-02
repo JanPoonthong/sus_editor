@@ -1,8 +1,8 @@
 import ctypes
 import sys
 
+import sdl2.sdlimage
 from sdl2 import *
-from sdl2.sdlimage import *
 
 FONT_WIDTH = 128
 FONT_HEIGHT = 64
@@ -15,18 +15,19 @@ ACSII_DISPLAY_LOW = 32
 # TODO(jan): Maybe 126
 ACSII_DISPLAY_HIGH = 127
 
-SCREEN_POS_X, SCREEN_POS_Y = 1920 // 2, 1080 // 2
+SCREEN_POS_X, SCREEN_POS_Y = (1920 - 800) // 2, (1080 - 600) // 2
 
 
 class SDL_Rect_Ascii(Structure):
     _fields_ = [("x", c_int), ("y", c_int), ("w", c_int), ("h", c_int)]
 
-    def __init__(self, x=0, y=0, w=0, h=0):
+    def __init__(self, x=0, y=0, w=0, h=0, asci=0):
         super(SDL_Rect_Ascii, self).__init__()
         self.x = x
         self.y = y
         self.w = w
         self.h = h
+        self.asci = asci
 
 
 def scc(code):
@@ -47,11 +48,10 @@ def surface_from_file(file_path):
     :param file_path: Accept file name as a string
     :return data.contents: As SDL_Surface object
     """
-    IMG_Init(IMG_INIT_PNG)
-    data = IMG_Load(file_path)
+    data = sdl2.sdlimage.IMG_Load(file_path)
 
     if not data:
-        print(f"IMG_Load ERROR: {IMG_GetError()}")
+        print(f"IMG_Load ERROR: {sdl2.sdlimage.IMG_GetError()}")
         sys.exit(1)
     return data.contents
 
@@ -93,6 +93,7 @@ def font_load_from_file(renderer, file_path):
             y=int(row * FONT_CHAR_HEIGHT),
             w=int(FONT_CHAR_WIDTH),
             h=int(FONT_CHAR_HEIGHT),
+            # asci=chr(index),
         )
         # print(chr(asci), font["glyph_table"][index])
 
@@ -140,6 +141,7 @@ def renderer_text(renderer, font, text, x, y, color, scale):
 
 def main():
     scc(SDL_Init(SDL_INIT_VIDEO))
+    scc(sdl2.sdlimage.IMG_Init(sdl2.sdlimage.IMG_INIT_PNG))
     window = SDL_CreateWindow(
         b"Sus Editor",
         SCREEN_POS_X,
@@ -152,7 +154,6 @@ def main():
 
     font = font_load_from_file(renderer, b"charmap-oldschool_white.png")
 
-    text_render_completed = False
     while True:
         event = scp(SDL_Event())
         if SDL_PollEvent(ctypes.byref(event)) != 0:
@@ -161,8 +162,8 @@ def main():
             else:
                 scc(SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0))
                 scc(SDL_RenderClear(renderer))
-                # if text_render_completed is not True:
-                text_render_completed = renderer_text(
+                # TODO(jan): I should only render the text once
+                renderer_text(
                     renderer, font, b"Jan Poonthong", 0, 0, 0x00FFFF, 5
                 )
                 SDL_RenderPresent(renderer)
@@ -170,5 +171,4 @@ def main():
     return 0
 
 
-if __name__ == "__main__":
-    main()
+main()
