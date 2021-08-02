@@ -161,7 +161,8 @@ def main():
 
     font = font_load_from_file(renderer, b"charmap-oldschool_white.png")
 
-    buffer_capacity = 5
+    #TODO(jan): 5
+    buffer_capacity = 1024
     buffer = []
     buffer_size = 0
     while True:
