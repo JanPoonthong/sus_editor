@@ -88,14 +88,22 @@ def font_load_from_file(renderer, file_path):
         # Get each letters in which row -> know row
         row = int(index / FONT_COLS)
         # print(f"Index: {index} / {FONT_COLS} = Row {row}")
-        font["glyph_table"][index] = SDL_Rect(
+        font["glyph_table"][index] = SdlRectAscii(
             x=int(col * FONT_CHAR_WIDTH),
             y=int(row * FONT_CHAR_HEIGHT),
             w=int(FONT_CHAR_WIDTH),
             h=int(FONT_CHAR_HEIGHT),
-            # asci=chr(index),
+            asci=index,
+        ).return_lp_sdl_rect()
+        # FIXME(jan): expected LP_SDL_Rect instance instead of SDL_Rect_Ascii"""
+        # FIXME(jan): expected: <class 'sdl2.rect.SDL_Rect'>"""
+        # FIXME(jan): value: <class '__main__.SDL_Rect_Ascii'>"""
+        # print(SDL_Rect_Ascii(0, 0, 0, 0, 33))
+        print(
+            chr(asci),
+            type(font["glyph_table"][index]),
+            font["glyph_table"][index],
         )
-        # print(chr(asci), font["glyph_table"][index])
 
     return font
 
