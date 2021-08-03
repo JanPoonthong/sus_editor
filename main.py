@@ -2,11 +2,16 @@ import ctypes
 import string
 import sys
 import time
+import os
+
+if sys.platform == "win32":
+    os.environ["PYSDL2_DLL_PATH"] = os.path.dirname(os.path.realpath(__file__))
 
 import sdl2.sdlimage
 from sdl2 import *
 
 from sdl_rect_ascii import SdlRectAscii
+
 
 FONT_WIDTH = 128
 FONT_HEIGHT = 64
@@ -208,9 +213,9 @@ def main():
                     event, buffer, buffer_size, character_allow
                 )
 
-                print(buffer, buffer_size)
+                # print(buffer, buffer_size)
                 if buffer_size != 0:
-                    print("Renderer")
+                    # print("Renderer")
                     renderer_text_sized(
                         renderer, font, buffer, buffer_size, 0, 0, 0x00FFFF, 5
                     )
