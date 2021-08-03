@@ -209,7 +209,7 @@ def render_cursor(renderer, buffer_cursor, color):
     )
 
     unhex_unpack = unhex(color)
-    scc(SDL_SetRenderDrawColor(renderer, (*unhex_unpack)))
+    scc(SDL_SetRenderDrawColor(renderer, *unhex_unpack))
     scc(SDL_RenderFillRect(renderer, rect))
 
 
