@@ -15,7 +15,6 @@ FONT_CHAR_WIDTH = FONT_WIDTH / FONT_COLS
 FONT_CHAR_HEIGHT = FONT_HEIGHT / FONT_ROWS
 
 ACSII_DISPLAY_LOW = 32
-# TODO(jan): Maybe 126
 ACSII_DISPLAY_HIGH = 127
 
 SCREEN_WIDTH = 800
@@ -23,6 +22,7 @@ SCREEN_HEIGHT = 600
 SCREEN_POS_X, SCREEN_POS_Y = (1920 - SCREEN_WIDTH) // 2, (
     1080 - SCREEN_HEIGHT
 ) // 2
+ALL_KEYS_INPUT = string.ascii_letters + string.punctuation + string.digits
 
 
 def scc(code):
@@ -111,7 +111,6 @@ def render_char(renderer, font, c, x, y, scale):
         h=int(FONT_CHAR_HEIGHT * scale),
     )
 
-    # print(c)
     assert c >= ACSII_DISPLAY_LOW
     assert c <= ACSII_DISPLAY_HIGH
     index = c - ACSII_DISPLAY_LOW
@@ -150,6 +149,23 @@ def renderer_text(renderer, font, text, x, y, color, scale):
     renderer_text_sized(renderer, font, text, len(text), x, y, color, scale)
 
 
+def handle_keys_decode(event, buffer, buffer_size, character_allow):
+    try:
+        character = event.text.text.decode("utf-8")
+    except UnicodeDecodeError:
+        # TODO(jan): Eating the error may effect other place
+        character = ""
+
+    free_space = character_allow - buffer_size
+    if character == "":
+        pass
+    elif character in ALL_KEYS_INPUT and free_space > 0:
+        buffer.append(character)
+        buffer_size += 1
+
+    return buffer, buffer_size
+
+
 def main():
     scc(SDL_Init(SDL_INIT_VIDEO))
     scc(sdl2.sdlimage.IMG_Init(sdl2.sdlimage.IMG_INIT_PNG))
@@ -165,36 +181,28 @@ def main():
 
     font = font_load_from_file(renderer, b"charmap-oldschool_white.png")
 
-    buffer_capacity = 1024
+    character_allow = 10
     buffer = []
     buffer_size = 0
+
     while True:
         event = scp(SDL_Event())
         if SDL_PollEvent(ctypes.byref(event)) != 0:
             if event.type == SDL_QUIT:
                 break
             elif SDL_TEXTINPUT:
-                try:
-                    text = event.text.text.decode("utf-8")
-                except UnicodeDecodeError:
-                    pass
-
-                free_space = buffer_capacity - buffer_size
-                if (
-                    text != ""
-                    and text
-                    in string.ascii_letters + string.punctuation + string.digits
-                ):
-                    if free_space != 0:
-                        buffer.append(text)
-                        buffer_size += 1
-
                 scc(SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0))
                 scc(SDL_RenderClear(renderer))
-                if len(buffer) != 0 and buffer_size != 0:
+
+                buffer, buffer_size = handle_keys_decode(
+                    event, buffer, buffer_size, character_allow
+                )
+
+                if buffer_size != 0:
                     renderer_text_sized(
                         renderer, font, buffer, buffer_size, 0, 0, 0x00FFFF, 5
                     )
+
                 SDL_RenderPresent(renderer)
     SDL_Quit()
     return 0
