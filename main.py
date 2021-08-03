@@ -1,6 +1,7 @@
 import ctypes
 import string
 import sys
+import time
 
 import sdl2.sdlimage
 from sdl2 import *
@@ -142,7 +143,7 @@ def renderer_text_sized(renderer, font, text, text_size, x, y, color, scale):
     for i in range(text_size):
         render_char(renderer, font, ord(text[i]), x, y, scale)
         x += FONT_CHAR_WIDTH * scale
-    return True
+    return 0
 
 
 def renderer_text(renderer, font, text, x, y, color, scale):
@@ -181,16 +182,25 @@ def main():
 
     font = font_load_from_file(renderer, b"charmap-oldschool_white.png")
 
-    character_allow = 10
+    character_allow = 1024
     buffer = []
     buffer_size = 0
+    buffer_cursor = 0
 
     while True:
         event = scp(SDL_Event())
         if SDL_PollEvent(ctypes.byref(event)) != 0:
             if event.type == SDL_QUIT:
                 break
-            elif SDL_TEXTINPUT:
+
+            if SDL_KEYDOWN:
+                print(event.key.keysym.sym)
+                if event.key.keysym.sym == SDLK_BACKSPACE:
+                    if buffer_size > 0:
+                        buffer.pop()
+                        buffer_size -= 1
+
+            if SDL_TEXTINPUT:
                 scc(SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0))
                 scc(SDL_RenderClear(renderer))
 
@@ -198,7 +208,9 @@ def main():
                     event, buffer, buffer_size, character_allow
                 )
 
+                print(buffer, buffer_size)
                 if buffer_size != 0:
+                    print("Renderer")
                     renderer_text_sized(
                         renderer, font, buffer, buffer_size, 0, 0, 0x00FFFF, 5
                     )
