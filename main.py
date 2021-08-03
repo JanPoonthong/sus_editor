@@ -1,17 +1,30 @@
 import ctypes
 import string
 import sys
-import time
 import os
+import subprocess
 
-if sys.platform == "win32":
-    os.environ["PYSDL2_DLL_PATH"] = os.path.dirname(os.path.realpath(__file__))
-
-import sdl2.sdlimage
 from sdl2 import *
+import sdl2.sdlimage
 
 from sdl_rect_ascii import SdlRectAscii
 
+if sys.platform == "win32":
+    win32 = ctypes.windll.user32
+    SCREEN_RESOLUTION_WIDTH = win32.GetSystemMetrics(0)
+    SCREEN_RESOLUTION_HEIGHT = win32.GetSystemMetrics(1)
+else:
+    output = (
+        subprocess.Popen(
+            'xrandr | grep "\*" | cut -d" " -f4',
+            shell=True,
+            stdout=subprocess.PIPE,
+        )
+        .communicate()[0]
+        .decode("utf-8")
+    )
+    SCREEN_RESOLUTION_WIDTH = int(output[:4])
+    SCREEN_RESOLUTION_HEIGHT = int(output[5:])
 
 FONT_WIDTH = 128
 FONT_HEIGHT = 64
@@ -25,8 +38,8 @@ ACSII_DISPLAY_HIGH = 127
 
 SCREEN_WIDTH = 800
 SCREEN_HEIGHT = 600
-SCREEN_POS_X, SCREEN_POS_Y = (1920 - SCREEN_WIDTH) // 2, (
-    1080 - SCREEN_HEIGHT
+SCREEN_POS_X, SCREEN_POS_Y = (SCREEN_RESOLUTION_WIDTH - SCREEN_WIDTH) // 2, (
+    SCREEN_RESOLUTION_HEIGHT - SCREEN_HEIGHT
 ) // 2
 ALL_KEYS_INPUT = string.ascii_letters + string.punctuation + string.digits
 
