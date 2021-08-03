@@ -145,7 +145,7 @@ def render_char(renderer, font, c, x, y, scale):
     )
 
 
-def renderer_text_sized(renderer, font, text, text_size, x, y, color, scale):
+def render_text_sized(renderer, font, text, text_size, x, y, color, scale):
     SDL_SetTextureColorMod(
         font["spritesheet"],
         # 2 left digits -> R
@@ -165,7 +165,7 @@ def renderer_text_sized(renderer, font, text, text_size, x, y, color, scale):
 
 
 def renderer_text(renderer, font, text, x, y, color, scale):
-    renderer_text_sized(renderer, font, text, len(text), x, y, color, scale)
+    render_text_sized(renderer, font, text, len(text), x, y, color, scale)
 
 
 def handle_keys_decode(event, buffer, buffer_size, character_allow):
@@ -212,7 +212,6 @@ def main():
                 break
 
             if SDL_KEYDOWN:
-                print(event.key.keysym.sym)
                 if event.key.keysym.sym == SDLK_BACKSPACE:
                     if buffer_size > 0:
                         buffer.pop()
@@ -226,12 +225,12 @@ def main():
                     event, buffer, buffer_size, character_allow
                 )
 
-                print(buffer, buffer_size)
                 if buffer_size != 0:
-                    print("Renderer")
-                    renderer_text_sized(
-                        renderer, font, buffer, buffer_size, 0, 0, 0x00FFFF, 5
+                    render_text_sized(
+                        renderer, font, buffer, buffer_size, 0, 0, 0x00FFFF, FONT_SCALE
                     )
+                render
+
 
                 SDL_RenderPresent(renderer)
     SDL_Quit()
