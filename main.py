@@ -50,26 +50,17 @@ def surface_from_file(file_path):
     return data.contents
 
 
-def font_object():
-    """
-    Create black SDL_Texture and 95 of free list space
-    :return dict
-    """
-    font = {
-        "spritesheet": SDL_Texture(),
-        "glyph_table": [0] * (ACSII_DISPLAY_HIGH - ACSII_DISPLAY_LOW),
-    }
-    return font
+class Font:
+    def __init__(self):
+        self.spritesheet = SDL_Texture()
+        self.glyph_table = [0] * (ACSII_DISPLAY_HIGH - ACSII_DISPLAY_LOW)
 
 
 def font_load_from_file(renderer, file_path):
-    """
-    :return dict
-    """
-    font = font_object()
+    font = Font()
 
     font_surface = surface_from_file(file_path)
-    font["spritesheet"] = scp(
+    font.spritesheet = scp(
         SDL_CreateTextureFromSurface(renderer, font_surface)
     )
 
@@ -80,7 +71,7 @@ def font_load_from_file(renderer, file_path):
         col = int(index % FONT_COLS)
         row = int(index / FONT_COLS)
 
-        font["glyph_table"][index] = SdlRectAscii(
+        font.glyph_table[index] = SdlRectAscii(
             x=int(col * FONT_CHAR_WIDTH),
             y=int(row * FONT_CHAR_HEIGHT),
             w=int(FONT_CHAR_WIDTH),
@@ -106,8 +97,8 @@ def render_char(renderer, font, c, x, y, scale):
     scc(
         SDL_RenderCopy(
             renderer,
-            font["spritesheet"],
-            font["glyph_table"][index].get_lp_sdl_rect,
+            font.spritesheet,
+            font.glyph_table[index].get_lp_sdl_rect,
             dst,
         )
     )
@@ -115,13 +106,13 @@ def render_char(renderer, font, c, x, y, scale):
 
 def render_text_sized(renderer, font, text, text_size, x, y, color, scale):
     SDL_SetTextureColorMod(
-        font["spritesheet"],
+        font.spritesheet,
         color >> (8 * 2) & 0xFF,
         color >> (8 * 1) & 0xFF,
         color >> (8 * 0) & 0xFF,
     )
 
-    scc(SDL_SetTextureAlphaMod(font["spritesheet"], color >> (8 * 3) & 0xFF))
+    scc(SDL_SetTextureAlphaMod(font.spritesheet, color >> (8 * 3) & 0xFF))
 
     for i in range(text_size):
         render_char(renderer, font, ord(text[i]), x, y, scale)
@@ -172,7 +163,6 @@ def main():
     renderer = scp(SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED))
 
     font = font_load_from_file(renderer, b"charmap-oldschool_white.png")
-
     buffer_capacity = 1024
     buffer = []
     buffer_size = 0
