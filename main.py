@@ -1,6 +1,5 @@
 import ctypes
 import string
-import subprocess
 import sys
 
 import sdl2.sdlimage
