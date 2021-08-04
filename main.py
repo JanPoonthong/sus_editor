@@ -13,8 +13,8 @@ FONT_CHAR_WIDTH = FONT_WIDTH / FONT_COLS
 FONT_CHAR_HEIGHT = FONT_HEIGHT / FONT_ROWS
 FONT_SCALE = 5
 
-ACSII_DISPLAY_LOW = 32
-ACSII_DISPLAY_HIGH = 127
+ASCII_DISPLAY_LOW = 32
+ASCII_DISPLAY_HIGH = 127
 
 SCREEN_WIDTH = 800
 SCREEN_HEIGHT = 600
@@ -49,28 +49,32 @@ def surface_from_file(file_path):
 
 class Font:
     def __init__(self):
-        self.spritesheet = SDL_Texture()
-        self.glyph_table = [0] * (ACSII_DISPLAY_HIGH - ACSII_DISPLAY_LOW)
+        self.sprite_sheet = SDL_Texture()
+        self.glyph_table = []
 
 
 def font_load_from_file(renderer, file_path):
     font = Font()
 
     font_surface = surface_from_file(file_path)
-    font.spritesheet = scp(SDL_CreateTextureFromSurface(renderer, font_surface))
+    font.sprite_sheet = scp(
+        SDL_CreateTextureFromSurface(renderer, font_surface)
+    )
 
     SDL_FreeSurface(font_surface)
 
-    for asci in range(ACSII_DISPLAY_LOW, ACSII_DISPLAY_HIGH):
-        index = asci - ACSII_DISPLAY_LOW
+    for asci in range(ASCII_DISPLAY_LOW, ASCII_DISPLAY_HIGH):
+        index = asci - ASCII_DISPLAY_LOW
         col = int(index % FONT_COLS)
         row = int(index / FONT_COLS)
 
-        font.glyph_table[index] = SDL_Rect(
-            x=int(col * FONT_CHAR_WIDTH),
-            y=int(row * FONT_CHAR_HEIGHT),
-            w=int(FONT_CHAR_WIDTH),
-            h=int(FONT_CHAR_HEIGHT),
+        font.glyph_table.append(
+            SDL_Rect(
+                x=int(col * FONT_CHAR_WIDTH),
+                y=int(row * FONT_CHAR_HEIGHT),
+                w=int(FONT_CHAR_WIDTH),
+                h=int(FONT_CHAR_HEIGHT),
+            )
         )
 
     return font
@@ -84,21 +88,23 @@ def render_char(renderer, font, c, x, y, scale):
         h=int(FONT_CHAR_HEIGHT * scale),
     )
 
-    assert c >= ACSII_DISPLAY_LOW
-    assert c <= ACSII_DISPLAY_HIGH
-    index = c - ACSII_DISPLAY_LOW
+    assert c >= ASCII_DISPLAY_LOW
+    assert c <= ASCII_DISPLAY_HIGH
+    index = c - ASCII_DISPLAY_LOW
 
     scc(
-        SDL_RenderCopy(renderer, font.spritesheet, font.glyph_table[index], dst)
+        SDL_RenderCopy(
+            renderer, font.sprite_sheet, font.glyph_table[index], dst
+        )
     )
 
 
 def render_text_sized(renderer, font, text, text_size, x, y, color, scale):
     r, g, b, a = unhex(color)
 
-    SDL_SetTextureColorMod(font.spritesheet, r, g, b)
+    SDL_SetTextureColorMod(font.sprite_sheet, r, g, b)
 
-    scc(SDL_SetTextureAlphaMod(font.spritesheet, a))
+    scc(SDL_SetTextureAlphaMod(font.sprite_sheet, a))
 
     for i in range(text_size):
         render_char(renderer, font, ord(text[i]), x, y, scale)
