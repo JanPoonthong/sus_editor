@@ -15,4 +15,4 @@ ded editor: https://github.com/tsoding/ded
 
 ## Font
 
-domsson-fontgen: https://github.com/tsoding/domsson-fontgen
+domsson: https://opengameart.org/content/ascii-bitmap-font-oldschool
