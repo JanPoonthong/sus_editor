@@ -47,12 +47,6 @@ def surface_from_file(file_path):
     return data.contents
 
 
-class Font:
-    def __init__(self):
-        self.sprite_sheet = SDL_Texture()
-        self.glyph_table = []
-
-
 def font_load_from_file(renderer, file_path):
     font = Font()
 
@@ -80,10 +74,16 @@ def font_load_from_file(renderer, file_path):
     return font
 
 
-def render_char(renderer, font, c, x, y, scale):
+class Font:
+    def __init__(self):
+        self.sprite_sheet = SDL_Texture()
+        self.glyph_table = []
+
+
+def render_char(renderer, font, c, pos, scale):
     dst = SDL_Rect(
-        x=int(x),
-        y=int(y),
+        x=int(pos.x),
+        y=int(0),
         w=int(FONT_CHAR_WIDTH * scale),
         h=int(FONT_CHAR_HEIGHT * scale),
     )
@@ -99,21 +99,19 @@ def render_char(renderer, font, c, x, y, scale):
     )
 
 
-def render_text_sized(renderer, font, text, text_size, x, y, color, scale):
-    r, g, b, a = unhex(color)
+def render_text_sized(renderer, font, text, text_size, pos, color, scale):
 
-    SDL_SetTextureColorMod(font.sprite_sheet, r, g, b)
+    set_texture_color(font.sprite_sheet, color)
 
-    scc(SDL_SetTextureAlphaMod(font.sprite_sheet, a))
-
+    pos = Pos(pos.x, pos.y)
     for i in range(text_size):
-        render_char(renderer, font, ord(text[i]), x, y, scale)
-        x += FONT_CHAR_WIDTH * scale
+        render_char(renderer, font, ord(text[i]), pos, scale)
+        pos.x += FONT_CHAR_WIDTH * scale
     return 0
 
 
-def renderer_text(renderer, font, text, x, y, color, scale):
-    render_text_sized(renderer, font, text, len(text), x, y, color, scale)
+def renderer_text(renderer, font, text, pos, color, scale):
+    render_text_sized(renderer, font, text, len(text), pos, color, scale)
 
 
 def unhex(color):
@@ -128,7 +126,20 @@ def unhex(color):
     return r, g, b, a
 
 
-def render_cursor(renderer, buffer_cursor, color):
+class Pos:
+    def __init__(self, x, y):
+        self.x = x
+        self.y = y
+
+
+def set_texture_color(texture, color):
+    r, g, b, a = unhex(color)
+    SDL_SetTextureColorMod(texture, r, g, b)
+    scc(SDL_SetTextureAlphaMod(texture, a))
+
+
+def render_cursor(renderer, buffer_cursor):
+    # pos = Pos(buffer_cursor * FONT_CHAR_WIDTH * FONT_SCALE, 0)
     cursor_rect = SDL_Rect(
         x=int(buffer_cursor * FONT_CHAR_WIDTH * FONT_SCALE),
         y=0,
@@ -136,9 +147,14 @@ def render_cursor(renderer, buffer_cursor, color):
         h=int(FONT_CHAR_HEIGHT * FONT_SCALE),
     )
 
-    unhex_unpack = unhex(color)
+    unhex_unpack = unhex(0xFFFFFF)
     scc(SDL_SetRenderDrawColor(renderer, *unhex_unpack))
     scc(SDL_RenderFillRect(renderer, cursor_rect))
+
+    # set_texture_color(font.sprite_sheet, 0xFF0000)
+
+    # if buffer_cursor < buffer_size:
+    #     render_char(renderer, font, buffer[buffer_cursor], pos, FONT_SCALE)
 
 
 def main():
@@ -155,10 +171,12 @@ def main():
     renderer = scp(SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED))
 
     font = font_load_from_file(renderer, b"charmap-oldschool_white.png")
+
     buffer_capacity = 1024
     buffer = []
     buffer_size = 0
     buffer_cursor = 0
+    pos = Pos(0, 0)
 
     while True:
         event = scp(SDL_Event())
@@ -199,13 +217,12 @@ def main():
                     font,
                     buffer,
                     buffer_size,
-                    0,
-                    0,
+                    pos,
                     0x00FFFF,
                     FONT_SCALE,
                 )
 
-            render_cursor(renderer, buffer_cursor, 0xFFFFFF)
+            render_cursor(renderer, buffer_cursor)
 
             SDL_RenderPresent(renderer)
 
