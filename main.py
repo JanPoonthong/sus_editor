@@ -1,10 +1,10 @@
 import ctypes
 import string
-import sys
 import subprocess
+import sys
 
-from sdl2 import *
 import sdl2.sdlimage
+from sdl2 import *
 
 from sdl_rect_ascii import SdlRectAscii
 
@@ -96,15 +96,9 @@ def font_load_from_file(renderer, file_path):
     SDL_FreeSurface(font_surface)
 
     for asci in range(ACSII_DISPLAY_LOW, ACSII_DISPLAY_HIGH):
-        # print(f"ASCII: {asci}, {ACSII_DISPLAY_HIGH - ACSII_DISPLAY_LOW}")
         index = asci - ACSII_DISPLAY_LOW
-        # print(f"Index: {chr(index)} -> {index} - 32 = {index - 32}")
-        # Get each letters in which col -> know col
         col = int(index % FONT_COLS)
-        # print(f"Index: {index} % {FONT_COLS} = Col {col}")
-        # Get each letters in which row -> know row
         row = int(index / FONT_COLS)
-        # print(f"Index: {index} / {FONT_COLS} = Row {row}")
 
         font["glyph_table"][index] = SdlRectAscii(
             x=int(col * FONT_CHAR_WIDTH),
@@ -113,11 +107,6 @@ def font_load_from_file(renderer, file_path):
             h=int(FONT_CHAR_HEIGHT),
             asci=asci,
         )
-        # print(
-        #     asci,
-        #     type(font["glyph_table"][index]),
-        #     font["glyph_table"][index],
-        # )
 
     return font
 
@@ -133,7 +122,6 @@ def render_char(renderer, font, c, x, y, scale):
     assert c >= ACSII_DISPLAY_LOW
     assert c <= ACSII_DISPLAY_HIGH
     index = c - ACSII_DISPLAY_LOW
-    # print(index, c, chr(c), font["glyph_table"][index])
 
     scc(
         SDL_RenderCopy(
@@ -148,11 +136,8 @@ def render_char(renderer, font, c, x, y, scale):
 def render_text_sized(renderer, font, text, text_size, x, y, color, scale):
     SDL_SetTextureColorMod(
         font["spritesheet"],
-        # 2 left digits -> R
         color >> (8 * 2) & 0xFF,
-        # 2 middle digits -> G
         color >> (8 * 1) & 0xFF,
-        # 2 right digits -> B
         color >> (8 * 0) & 0xFF,
     )
 
@@ -168,26 +153,6 @@ def renderer_text(renderer, font, text, x, y, color, scale):
     render_text_sized(renderer, font, text, len(text), x, y, color, scale)
 
 
-def handle_keys_decode(
-    event, buffer, buffer_size, buffer_cursor, character_allow
-):
-    try:
-        character = event.text.text.decode("utf-8")
-    except UnicodeDecodeError:
-        # TODO(jan): Eating the error may effect other place
-        character = ""
-
-    free_space = character_allow - buffer_size
-    if character == "":
-        pass
-    elif character in ALL_KEYS_INPUT and free_space > 0:
-        buffer.append(character)
-        buffer_size += 1
-        buffer_cursor = buffer_size
-
-    return buffer, buffer_size, buffer_cursor
-
-
 def unhex(color):
     # 2 left digits -> R
     r = color >> (8 * 2) & 0xFF
@@ -201,7 +166,7 @@ def unhex(color):
 
 
 def render_cursor(renderer, buffer_cursor, color):
-    rect = SDL_Rect(
+    cursor_rect = SDL_Rect(
         x=int(buffer_cursor * FONT_CHAR_WIDTH * FONT_SCALE),
         y=0,
         w=int(FONT_CHAR_WIDTH * FONT_SCALE),
@@ -210,7 +175,7 @@ def render_cursor(renderer, buffer_cursor, color):
 
     unhex_unpack = unhex(color)
     scc(SDL_SetRenderDrawColor(renderer, *unhex_unpack))
-    scc(SDL_RenderFillRect(renderer, rect))
+    scc(SDL_RenderFillRect(renderer, cursor_rect))
 
 
 def main():
@@ -228,11 +193,10 @@ def main():
 
     font = font_load_from_file(renderer, b"charmap-oldschool_white.png")
 
-    character_allow = 1024
+    buffer_capacity = 1024
     buffer = []
     buffer_size = 0
     buffer_cursor = 0
-    backspace_checker = 0
 
     while True:
         event = scp(SDL_Event())
@@ -240,37 +204,49 @@ def main():
             if event.type == SDL_QUIT:
                 break
 
-            if SDL_KEYDOWN:
+            if event.type == SDL_KEYDOWN:
                 if event.key.keysym.sym == SDLK_BACKSPACE:
-                    if backspace_checker % 2 == 0:
-                        if buffer_size > 0:
-                            buffer.pop()
-                            buffer_size -= 1
-                            buffer_cursor = buffer_size
-                    backspace_checker += 1
+                    if buffer_size > 0:
+                        buffer.pop()
+                        buffer_size -= 1
+                        buffer_cursor = buffer_size
 
-            if SDL_TEXTINPUT:
-                scc(SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0))
-                scc(SDL_RenderClear(renderer))
+                if event.key.keysym.sym == SDLK_LEFT:
+                    if buffer_cursor > 0:
+                        buffer_cursor -= 1
 
-                buffer, buffer_size, buffer_cursor = handle_keys_decode(
-                    event, buffer, buffer_size, buffer_cursor, character_allow
+                if event.key.keysym.sym == SDLK_RIGHT:
+                    if buffer_cursor < buffer_size:
+                        buffer_cursor += 1
+
+            if event.type == SDL_TEXTINPUT:
+                text_size = len(event.text.text)
+                free_space = buffer_capacity - buffer_size
+                if text_size > free_space:
+                    text_size = free_space
+                buffer.append(event.text.text)
+                buffer_size += text_size
+                buffer_cursor = buffer_size
+
+            scc(SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0))
+            scc(SDL_RenderClear(renderer))
+
+            if buffer_size != 0:
+                render_text_sized(
+                    renderer,
+                    font,
+                    buffer,
+                    buffer_size,
+                    0,
+                    0,
+                    0x00FFFF,
+                    FONT_SCALE,
                 )
 
-                if buffer_size != 0:
-                    render_text_sized(
-                        renderer,
-                        font,
-                        buffer,
-                        buffer_size,
-                        0,
-                        0,
-                        0x00FFFF,
-                        FONT_SCALE,
-                    )
-                render_cursor(renderer, buffer_cursor, 0xFFFFFF)
+            render_cursor(renderer, buffer_cursor, 0xFFFFFF)
 
-                SDL_RenderPresent(renderer)
+            SDL_RenderPresent(renderer)
+
     SDL_Quit()
     return 0
 
