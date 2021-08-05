@@ -8,5 +8,5 @@ import time
 mouse = Controller()
 subprocess.Popen("xkill", shell=True)
 mouse.position = (200, 400)
-time.sleep(0.50)
+time.sleep(1)
 mouse.click(Button.left, 1)
