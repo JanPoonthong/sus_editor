@@ -1,5 +1,4 @@
 import ctypes
-import string
 import sys
 
 import sdl2.sdlimage
@@ -130,12 +129,6 @@ def unhex(color):
     return r, g, b, a
 
 
-class Pos:
-    def __init__(self, x, y):
-        self.x = x
-        self.y = y
-
-
 def set_texture_color(texture, color):
     r, g, b, a = unhex(color)
     SDL_SetTextureColorMod(texture, r, g, b)
@@ -181,9 +174,15 @@ def del_buffer_text_before_cursor(buffer):
 
 
 def buffer_delete(buffer):
-    if buffer.cursor >= 0 and buffer.cursor < buffer.size:
+    if 0 <= buffer.cursor < buffer.size:
         buffer.size -= 1
         del buffer.container[buffer.cursor]
+
+
+class Pos:
+    def __init__(self, x, y):
+        self.x = x
+        self.y = y
 
 
 class Buffer:
