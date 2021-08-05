@@ -212,7 +212,7 @@ def main():
                     if buffer_cursor < buffer_size:
                         buffer_cursor += 1
 
-            if event.type == SDL_TEXTINPUT:
+            elif event.type == SDL_TEXTINPUT:
                 buffer_size, buffer_cursor = buffer_insert_text_before_cursor(
                     event.text.text, buffer_size, buffer_cursor
                 )
