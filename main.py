@@ -83,7 +83,7 @@ class Font:
 def render_char(renderer, font, c, pos, scale):
     dst = SDL_Rect(
         x=int(pos.x),
-        y=int(0),
+        y=int(pos.y),
         w=int(FONT_CHAR_WIDTH * scale),
         h=int(FONT_CHAR_HEIGHT * scale),
     )
@@ -103,7 +103,7 @@ def render_text_sized(renderer, font, text, text_size, pos, color, scale):
 
     set_texture_color(font.sprite_sheet, color)
 
-    pos = Pos(pos.x, pos.y)
+    pos.x = 0
     for i in range(text_size):
         render_char(renderer, font, ord(text[i]), pos, scale)
         pos.x += FONT_CHAR_WIDTH * scale
