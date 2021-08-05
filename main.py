@@ -107,7 +107,6 @@ def render_text_sized(renderer, font, text, text_size, pos, color, scale):
     for i in range(text_size):
         render_char(renderer, font, ord(text[i]), pos, scale)
         pos.x += FONT_CHAR_WIDTH * scale
-    return 0
 
 
 def renderer_text(renderer, font, text, pos, color, scale):
@@ -227,7 +226,6 @@ def main():
             SDL_RenderPresent(renderer)
 
     SDL_Quit()
-    return 0
 
 
 main()
