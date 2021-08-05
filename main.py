@@ -110,8 +110,8 @@ def render_text_sized(renderer, font, text, text_size, pos, color, scale):
         pos.x += FONT_CHAR_WIDTH * scale
 
 
-def renderer_text(renderer, font, text, pos, color, scale):
-    render_text_sized(renderer, font, text, len(text), pos, color, scale)
+# def renderer_text(renderer, font, text, pos, color, scale):
+#     render_text_sized(renderer, font, text, len(text), pos, color, scale)
 
 
 def unhex(color):
@@ -136,7 +136,6 @@ def set_texture_color(texture, color):
     r, g, b, a = unhex(color)
     SDL_SetTextureColorMod(texture, r, g, b)
     scc(SDL_SetTextureAlphaMod(texture, a))
-    print(r, g, b, a)
 
 
 def render_cursor(renderer, font, buffer, buffer_size, buffer_cursor):
@@ -158,6 +157,21 @@ def render_cursor(renderer, font, buffer, buffer_size, buffer_cursor):
         render_char(renderer, font, buffer[buffer_cursor], pos, FONT_SCALE)
 
 
+def buffer_insert_text_before_cursor(text, buffer_size, buffer_cursor):
+    text_size = len(text)
+    free_space = BUFFER_CAPACITY - buffer_size
+    if text_size > free_space:
+        text_size = free_space
+    buffer.insert(buffer_cursor, text)
+    buffer_size += text_size
+    buffer_cursor += text_size
+    return buffer_size, buffer_cursor
+
+
+BUFFER_CAPACITY = 1024
+buffer = []
+
+
 def main():
     scc(SDL_Init(SDL_INIT_VIDEO))
     scc(sdl2.sdlimage.IMG_Init(sdl2.sdlimage.IMG_INIT_PNG))
@@ -173,8 +187,6 @@ def main():
 
     font = font_load_from_file(renderer, b"charmap-oldschool_white.png")
 
-    buffer_capacity = 1024
-    buffer = []
     buffer_size = 0
     buffer_cursor = 0
     pos = Pos(0, 0)
@@ -201,13 +213,9 @@ def main():
                         buffer_cursor += 1
 
             if event.type == SDL_TEXTINPUT:
-                text_size = len(event.text.text)
-                free_space = buffer_capacity - buffer_size
-                if text_size > free_space:
-                    text_size = free_space
-                buffer.append(event.text.text)
-                buffer_size += text_size
-                buffer_cursor = buffer_size
+                buffer_size, buffer_cursor = buffer_insert_text_before_cursor(
+                    event.text.text, buffer_size, buffer_cursor
+                )
 
             scc(SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0))
             scc(SDL_RenderClear(renderer))
