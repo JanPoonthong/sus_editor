@@ -182,6 +182,13 @@ def del_buffer_text_before_cursor(buffer_size, buffer_cursor):
     return buffer_size, buffer_cursor
 
 
+def buffer_delete(buffer_size, buffer_cursor):
+    if buffer_cursor >= 0 and buffer_cursor < buffer_size:
+        buffer_size -= 1
+        del buffer[buffer_cursor]
+    return buffer_size, buffer_cursor
+
+
 def main():
     scc(SDL_Init(SDL_INIT_VIDEO))
     scc(sdl2.sdlimage.IMG_Init(sdl2.sdlimage.IMG_INIT_PNG))
@@ -210,6 +217,11 @@ def main():
             elif event.type == SDL_KEYDOWN:
                 if event.key.keysym.sym == SDLK_BACKSPACE:
                     buffer_size, buffer_cursor = del_buffer_text_before_cursor(
+                        buffer_size, buffer_cursor
+                    )
+
+                elif event.key.keysym.sym == SDLK_DELETE:
+                    buffer_size, buffer_cursor = buffer_delete(
                         buffer_size, buffer_cursor
                     )
 
