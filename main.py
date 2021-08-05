@@ -207,7 +207,7 @@ def main():
             if event.type == SDL_QUIT:
                 break
 
-            if event.type == SDL_KEYDOWN:
+            elif event.type == SDL_KEYDOWN:
                 if event.key.keysym.sym == SDLK_BACKSPACE:
                     buffer_size, buffer_cursor = del_buffer_text_before_cursor(
                         buffer_size, buffer_cursor
