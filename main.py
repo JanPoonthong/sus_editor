@@ -20,6 +20,9 @@ SCREEN_WIDTH = 800
 SCREEN_HEIGHT = 600
 ALL_KEYS_INPUT = string.ascii_letters + string.punctuation + string.digits
 
+BUFFER_CAPACITY = 1024
+buffer = []
+
 
 def scc(code):
     if code < 0:
@@ -168,10 +171,6 @@ def buffer_insert_text_before_cursor(text, buffer_size, buffer_cursor):
     return buffer_size, buffer_cursor
 
 
-BUFFER_CAPACITY = 1024
-buffer = []
-
-
 def main():
     scc(SDL_Init(SDL_INIT_VIDEO))
     scc(sdl2.sdlimage.IMG_Init(sdl2.sdlimage.IMG_INIT_PNG))
@@ -200,9 +199,9 @@ def main():
             if event.type == SDL_KEYDOWN:
                 if event.key.keysym.sym == SDLK_BACKSPACE:
                     if buffer_size > 0:
-                        buffer.pop()
                         buffer_size -= 1
-                        buffer_cursor = buffer_size
+                        buffer_cursor -= 1
+                        del buffer[buffer_cursor]
 
                 elif event.key.keysym.sym == SDLK_LEFT:
                     if buffer_cursor > 0:
