@@ -175,7 +175,7 @@ def buffer_insert_text_before_cursor(text, buffer_size, buffer_cursor):
 
 
 def del_buffer_text_before_cursor(buffer_size, buffer_cursor):
-    if buffer_size > 0:
+    if buffer_cursor > 0 and buffer_size > 0:
         buffer_size -= 1
         buffer_cursor -= 1
         del buffer[buffer_cursor]
