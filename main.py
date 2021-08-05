@@ -51,6 +51,7 @@ def font_load_from_file(renderer, file_path):
     font = Font()
 
     font_surface = surface_from_file(file_path)
+    scc(SDL_SetColorKey(font_surface, SDL_TRUE, 0xFF000000))
     font.sprite_sheet = scp(
         SDL_CreateTextureFromSurface(renderer, font_surface)
     )
@@ -88,6 +89,7 @@ def render_char(renderer, font, c, pos, scale):
         h=int(FONT_CHAR_HEIGHT * scale),
     )
 
+    c = ord(c)
     assert c >= ASCII_DISPLAY_LOW
     assert c <= ASCII_DISPLAY_HIGH
     index = c - ASCII_DISPLAY_LOW
@@ -100,12 +102,11 @@ def render_char(renderer, font, c, pos, scale):
 
 
 def render_text_sized(renderer, font, text, text_size, pos, color, scale):
-
     set_texture_color(font.sprite_sheet, color)
 
     pos.x = 0
     for i in range(text_size):
-        render_char(renderer, font, ord(text[i]), pos, scale)
+        render_char(renderer, font, text[i], pos, scale)
         pos.x += FONT_CHAR_WIDTH * scale
 
 
@@ -135,25 +136,26 @@ def set_texture_color(texture, color):
     r, g, b, a = unhex(color)
     SDL_SetTextureColorMod(texture, r, g, b)
     scc(SDL_SetTextureAlphaMod(texture, a))
+    print(r, g, b, a)
 
 
-def render_cursor(renderer, buffer_cursor):
-    # pos = Pos(buffer_cursor * FONT_CHAR_WIDTH * FONT_SCALE, 0)
+def render_cursor(renderer, font, buffer, buffer_size, buffer_cursor):
+    pos = Pos(buffer_cursor * FONT_CHAR_WIDTH * FONT_SCALE, 0)
     cursor_rect = SDL_Rect(
-        x=int(buffer_cursor * FONT_CHAR_WIDTH * FONT_SCALE),
-        y=0,
+        x=int(pos.x),
+        y=int(pos.y),
         w=int(FONT_CHAR_WIDTH * FONT_SCALE),
         h=int(FONT_CHAR_HEIGHT * FONT_SCALE),
     )
 
-    unhex_unpack = unhex(0xFFFFFF)
+    unhex_unpack = unhex(0xFFFFFFFF)
     scc(SDL_SetRenderDrawColor(renderer, *unhex_unpack))
     scc(SDL_RenderFillRect(renderer, cursor_rect))
 
-    # set_texture_color(font.sprite_sheet, 0xFF0000)
+    set_texture_color(font.sprite_sheet, 0xFF000000)
 
-    # if buffer_cursor < buffer_size:
-    #     render_char(renderer, font, buffer[buffer_cursor], pos, FONT_SCALE)
+    if buffer_cursor < buffer_size:
+        render_char(renderer, font, buffer[buffer_cursor], pos, FONT_SCALE)
 
 
 def main():
@@ -190,11 +192,11 @@ def main():
                         buffer_size -= 1
                         buffer_cursor = buffer_size
 
-                if event.key.keysym.sym == SDLK_LEFT:
+                elif event.key.keysym.sym == SDLK_LEFT:
                     if buffer_cursor > 0:
                         buffer_cursor -= 1
 
-                if event.key.keysym.sym == SDLK_RIGHT:
+                elif event.key.keysym.sym == SDLK_RIGHT:
                     if buffer_cursor < buffer_size:
                         buffer_cursor += 1
 
@@ -217,11 +219,11 @@ def main():
                     buffer,
                     buffer_size,
                     pos,
-                    0x00FFFF,
+                    0xFFFFFFFF,
                     FONT_SCALE,
                 )
 
-            render_cursor(renderer, buffer_cursor)
+            render_cursor(renderer, font, buffer, buffer_size, buffer_cursor)
 
             SDL_RenderPresent(renderer)
 
