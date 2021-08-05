@@ -18,10 +18,8 @@ ASCII_DISPLAY_HIGH = 127
 
 SCREEN_WIDTH = 800
 SCREEN_HEIGHT = 600
-ALL_KEYS_INPUT = string.ascii_letters + string.punctuation + string.digits
 
 BUFFER_CAPACITY = 1024
-buffer = []
 
 
 def scc(code):
@@ -48,6 +46,12 @@ def surface_from_file(file_path):
         print(f"IMG_Load ERROR: {sdl2.sdlimage.IMG_GetError()}")
         sys.exit(1)
     return data.contents
+
+
+class Font:
+    def __init__(self):
+        self.sprite_sheet = SDL_Texture()
+        self.glyph_table = []
 
 
 def font_load_from_file(renderer, file_path):
@@ -79,12 +83,6 @@ def font_load_from_file(renderer, file_path):
         )
 
     return font
-
-
-class Font:
-    def __init__(self):
-        self.sprite_sheet = SDL_Texture()
-        self.glyph_table = []
 
 
 def render_char(renderer, font, c, pos, scale):
@@ -144,8 +142,8 @@ def set_texture_color(texture, color):
     scc(SDL_SetTextureAlphaMod(texture, a))
 
 
-def render_cursor(renderer, font, buffer, buffer_size, buffer_cursor):
-    pos = Pos(buffer_cursor * FONT_CHAR_WIDTH * FONT_SCALE, 0)
+def render_cursor(renderer, font, buffer):
+    pos = Pos(buffer.cursor * FONT_CHAR_WIDTH * FONT_SCALE, 0)
     cursor_rect = SDL_Rect(
         x=int(pos.x),
         y=int(pos.y),
@@ -159,34 +157,40 @@ def render_cursor(renderer, font, buffer, buffer_size, buffer_cursor):
 
     set_texture_color(font.sprite_sheet, 0xFF000000)
 
-    if buffer_cursor < buffer_size:
-        render_char(renderer, font, buffer[buffer_cursor], pos, FONT_SCALE)
+    if buffer.cursor < buffer.size:
+        render_char(
+            renderer, font, buffer.container[buffer.cursor], pos, FONT_SCALE
+        )
 
 
-def buffer_insert_text_before_cursor(text, buffer_size, buffer_cursor):
+def buffer_insert_text_before_cursor(text, buffer):
     text_size = len(text)
-    free_space = BUFFER_CAPACITY - buffer_size
+    free_space = BUFFER_CAPACITY - buffer.size
     if text_size > free_space:
         text_size = free_space
-    buffer.insert(buffer_cursor, text)
-    buffer_size += text_size
-    buffer_cursor += text_size
-    return buffer_size, buffer_cursor
+    buffer.container.insert(buffer.cursor, text)
+    buffer.size += text_size
+    buffer.cursor += text_size
 
 
-def del_buffer_text_before_cursor(buffer_size, buffer_cursor):
-    if buffer_cursor > 0 and buffer_size > 0:
-        buffer_size -= 1
-        buffer_cursor -= 1
-        del buffer[buffer_cursor]
-    return buffer_size, buffer_cursor
+def del_buffer_text_before_cursor(buffer):
+    if buffer.cursor > 0 and buffer.size > 0:
+        buffer.size -= 1
+        buffer.cursor -= 1
+        del buffer.container[buffer.cursor]
 
 
-def buffer_delete(buffer_size, buffer_cursor):
-    if buffer_cursor >= 0 and buffer_cursor < buffer_size:
-        buffer_size -= 1
-        del buffer[buffer_cursor]
-    return buffer_size, buffer_cursor
+def buffer_delete(buffer):
+    if buffer.cursor >= 0 and buffer.cursor < buffer.size:
+        buffer.size -= 1
+        del buffer.container[buffer.cursor]
+
+
+class Buffer:
+    def __init__(self):
+        self.size = 0
+        self.cursor = 0
+        self.container = []
 
 
 def main():
@@ -204,9 +208,8 @@ def main():
 
     font = font_load_from_file(renderer, b"charmap-oldschool_white.png")
 
-    buffer_size = 0
-    buffer_cursor = 0
     pos = Pos(0, 0)
+    buffer = Buffer()
 
     while True:
         event = scp(SDL_Event())
@@ -216,43 +219,37 @@ def main():
 
             elif event.type == SDL_KEYDOWN:
                 if event.key.keysym.sym == SDLK_BACKSPACE:
-                    buffer_size, buffer_cursor = del_buffer_text_before_cursor(
-                        buffer_size, buffer_cursor
-                    )
+                    del_buffer_text_before_cursor(buffer)
 
                 elif event.key.keysym.sym == SDLK_DELETE:
-                    buffer_size, buffer_cursor = buffer_delete(
-                        buffer_size, buffer_cursor
-                    )
+                    buffer_delete(buffer)
 
                 elif event.key.keysym.sym == SDLK_LEFT:
-                    if buffer_cursor > 0:
-                        buffer_cursor -= 1
+                    if buffer.cursor > 0:
+                        buffer.cursor -= 1
 
                 elif event.key.keysym.sym == SDLK_RIGHT:
-                    if buffer_cursor < buffer_size:
-                        buffer_cursor += 1
+                    if buffer.cursor < buffer.size:
+                        buffer.cursor += 1
 
             elif event.type == SDL_TEXTINPUT:
-                buffer_size, buffer_cursor = buffer_insert_text_before_cursor(
-                    event.text.text, buffer_size, buffer_cursor
-                )
+                buffer_insert_text_before_cursor(event.text.text, buffer)
 
             scc(SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0))
             scc(SDL_RenderClear(renderer))
 
-            if buffer_size != 0:
+            if buffer.size != 0:
                 render_text_sized(
                     renderer,
                     font,
-                    buffer,
-                    buffer_size,
+                    buffer.container,
+                    buffer.size,
                     pos,
                     0xFFFFFFFF,
                     FONT_SCALE,
                 )
 
-            render_cursor(renderer, font, buffer, buffer_size, buffer_cursor)
+            render_cursor(renderer, font, buffer)
 
             SDL_RenderPresent(renderer)
 
