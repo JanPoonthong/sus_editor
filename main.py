@@ -3,7 +3,7 @@ import sys
 
 import sdl2
 import sdl2.sdlimage
-from line import *
+import buffer
 
 FONT_WIDTH = 128
 FONT_HEIGHT = 64
@@ -182,8 +182,7 @@ def main():
     font = font_load_from_file(renderer, b"charmap-oldschool_white.png")
 
     pos = Pos(0, 0)
-    line = Line()
-    cursor = 0
+    line = buffer.Line()
 
     running = True
     while running:
@@ -194,25 +193,21 @@ def main():
 
             elif event.type == sdl2.SDL_KEYDOWN:
                 if event.key.keysym.sym == sdl2.SDLK_BACKSPACE:
-                    if cursor > 0 and line.size > 0:
-                        cursor -= 1
-                        line_backspace(line, cursor)
+                    buffer.line_backspace(line)
 
                 elif event.key.keysym.sym == sdl2.SDLK_DELETE:
-                    if 0 <= cursor < line.size:
-                        line_delete(line, cursor)
+                    buffer.line_delete(line)
 
                 elif event.key.keysym.sym == sdl2.SDLK_LEFT:
-                    if cursor > 0:
-                        cursor -= 1
+                    if line.cursor > 0:
+                        line.cursor -= 1
 
                 elif event.key.keysym.sym == sdl2.SDLK_RIGHT:
-                    if cursor < line.size:
-                        cursor += 1
+                    if line.cursor < line.size:
+                        line.cursor += 1
 
             elif event.type == sdl2.SDL_TEXTINPUT:
-                line_insert_text_before(line, event.text.text, cursor)
-                cursor += len(event.text.text)
+                buffer.line_insert_text_before(line, event.text.text)
 
             scc(sdl2.SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0))
             scc(sdl2.SDL_RenderClear(renderer))
@@ -220,7 +215,7 @@ def main():
             if line.size != 0:
                 render_text_sized(renderer, font, line, pos, FONT_SCALE)
 
-            render_cursor(renderer, font, cursor, line)
+            render_cursor(renderer, font, line.cursor, line)
 
             sdl2.SDL_RenderPresent(renderer)
 
