@@ -1,7 +1,7 @@
 """DO NOT RUN IT FILE ON LOCAL MACHINE"""
 import subprocess
 
-subprocess.Popen("python3 main.py", shell=True)
+subprocess.Popen("cd ../ && python3 main.py", shell=True)
 from pynput.mouse import Button, Controller
 import time
 
