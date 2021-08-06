@@ -3,7 +3,7 @@ import sys
 
 import sdl2
 import sdl2.sdlimage
-import buffer
+import editor
 
 FONT_WIDTH = 128
 FONT_HEIGHT = 64
@@ -182,7 +182,8 @@ def main():
     font = font_load_from_file(renderer, b"charmap-oldschool_white.png")
 
     pos = Pos(0, 0)
-    line = buffer.Line()
+    line = editor.Line()
+    editor_obj = editor.Editor()
 
     running = True
     while running:
@@ -193,10 +194,10 @@ def main():
 
             elif event.type == sdl2.SDL_KEYDOWN:
                 if event.key.keysym.sym == sdl2.SDLK_BACKSPACE:
-                    buffer.line_backspace(line)
+                    editor.line_backspace(line, line.cursor)
 
                 elif event.key.keysym.sym == sdl2.SDLK_DELETE:
-                    buffer.line_delete(line)
+                    editor.line_delete(line, line.cursor)
 
                 elif event.key.keysym.sym == sdl2.SDLK_LEFT:
                     if line.cursor > 0:
@@ -207,7 +208,10 @@ def main():
                         line.cursor += 1
 
             elif event.type == sdl2.SDL_TEXTINPUT:
-                buffer.line_insert_text_before(line, event.text.text)
+                editor.line_insert_text_before(
+                    line, event.text.text, line.cursor
+                )
+                # editor.editor_insert_text_before(editor_obj, event.text.text)
 
             scc(sdl2.SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0))
             scc(sdl2.SDL_RenderClear(renderer))
