@@ -199,7 +199,7 @@ def main():
                         line_backspace(line, cursor)
 
                 elif event.key.keysym.sym == sdl2.SDLK_DELETE:
-                    if cursor >= 0 and cursor < line.size:
+                    if 0 <= cursor < line.size:
                         line_delete(line, cursor)
 
                 elif event.key.keysym.sym == sdl2.SDLK_LEFT:
