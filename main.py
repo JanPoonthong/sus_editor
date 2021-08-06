@@ -1,8 +1,9 @@
 import ctypes
 import sys
 
+import sdl2
 import sdl2.sdlimage
-from sdl2 import *
+from line import *
 
 FONT_WIDTH = 128
 FONT_HEIGHT = 64
@@ -21,15 +22,26 @@ SCREEN_HEIGHT = 600
 BUFFER_CAPACITY = 1024
 
 
+class Font:
+    sprite_sheet = sdl2.SDL_Texture()
+    glyph_table = []
+
+
+class Pos:
+    def __init__(self, x, y):
+        self.x = x
+        self.y = y
+
+
 def scc(code):
     if code < 0:
-        print(f"SDL ERROR: {SDL_GetError()}")
+        print(f"SDL ERROR: {sdl2.SDL_GetError()}")
         sys.exit(1)
 
 
 def scp(ptr):
     if ptr == 0:
-        print(f"SDL ERROR: {SDL_GetError()}")
+        print(f"SDL ERROR: {sdl2.SDL_GetError()}")
         sys.exit(1)
     return ptr
 
@@ -47,12 +59,6 @@ def surface_from_file(file_path):
     return data.contents
 
 
-class Font:
-    def __init__(self):
-        self.sprite_sheet = SDL_Texture()
-        self.glyph_table = []
-
-
 def font_load_from_file(renderer, file_path):
     """
     :return font, the ascii font will be loaded into Font Object(caching)
@@ -60,12 +66,12 @@ def font_load_from_file(renderer, file_path):
     font = Font()
 
     font_surface = surface_from_file(file_path)
-    scc(SDL_SetColorKey(font_surface, SDL_TRUE, 0xFF000000))
+    scc(sdl2.SDL_SetColorKey(font_surface, sdl2.SDL_TRUE, 0xFF000000))
     font.sprite_sheet = scp(
-        SDL_CreateTextureFromSurface(renderer, font_surface)
+        sdl2.SDL_CreateTextureFromSurface(renderer, font_surface)
     )
 
-    SDL_FreeSurface(font_surface)
+    sdl2.SDL_FreeSurface(font_surface)
 
     for asci in range(ASCII_DISPLAY_LOW, ASCII_DISPLAY_HIGH):
         index = asci - ASCII_DISPLAY_LOW
@@ -73,7 +79,7 @@ def font_load_from_file(renderer, file_path):
         row = int(index / FONT_COLS)
 
         font.glyph_table.append(
-            SDL_Rect(
+            sdl2.SDL_Rect(
                 x=int(col * FONT_CHAR_WIDTH),
                 y=int(row * FONT_CHAR_HEIGHT),
                 w=int(FONT_CHAR_WIDTH),
@@ -85,7 +91,7 @@ def font_load_from_file(renderer, file_path):
 
 
 def render_char(renderer, font, c, pos, scale):
-    dst = SDL_Rect(
+    dst = sdl2.SDL_Rect(
         x=int(pos.x),
         y=int(pos.y),
         w=int(FONT_CHAR_WIDTH * scale),
@@ -98,13 +104,17 @@ def render_char(renderer, font, c, pos, scale):
     index = c - ASCII_DISPLAY_LOW
 
     scc(
-        SDL_RenderCopy(
+        sdl2.SDL_RenderCopy(
             renderer, font.sprite_sheet, font.glyph_table[index], dst
         )
     )
 
 
-def render_text_sized(renderer, font, text, text_size, pos, color, scale):
+def render_text_sized(renderer, font, line, pos, scale):
+    text = line.chars
+    text_size = line.size
+    color = 0xFFFFFFFF
+
     set_texture_color(font.sprite_sheet, color)
 
     pos.x = 0
@@ -131,13 +141,13 @@ def unhex(color):
 
 def set_texture_color(texture, color):
     r, g, b, a = unhex(color)
-    SDL_SetTextureColorMod(texture, r, g, b)
-    scc(SDL_SetTextureAlphaMod(texture, a))
+    sdl2.SDL_SetTextureColorMod(texture, r, g, b)
+    scc(sdl2.SDL_SetTextureAlphaMod(texture, a))
 
 
-def render_cursor(renderer, font, buffer):
-    pos = Pos(buffer.cursor * FONT_CHAR_WIDTH * FONT_SCALE, 0)
-    cursor_rect = SDL_Rect(
+def render_cursor(renderer, font, cursor, line):
+    pos = Pos(cursor * FONT_CHAR_WIDTH * FONT_SCALE, 0)
+    cursor_rect = sdl2.SDL_Rect(
         x=int(pos.x),
         y=int(pos.y),
         w=int(FONT_CHAR_WIDTH * FONT_SCALE),
@@ -145,114 +155,76 @@ def render_cursor(renderer, font, buffer):
     )
 
     unhex_unpack = unhex(0xFFFFFFFF)
-    scc(SDL_SetRenderDrawColor(renderer, *unhex_unpack))
-    scc(SDL_RenderFillRect(renderer, cursor_rect))
+    scc(sdl2.SDL_SetRenderDrawColor(renderer, *unhex_unpack))
+    scc(sdl2.SDL_RenderFillRect(renderer, cursor_rect))
 
     set_texture_color(font.sprite_sheet, 0xFF000000)
 
-    if buffer.cursor < buffer.size:
-        render_char(
-            renderer, font, buffer.container[buffer.cursor], pos, FONT_SCALE
-        )
-
-
-def buffer_insert_text_before_cursor(text, buffer):
-    text_size = len(text)
-    free_space = BUFFER_CAPACITY - buffer.size
-    if text_size > free_space:
-        text_size = free_space
-    buffer.container.insert(buffer.cursor, text)
-    buffer.size += text_size
-    buffer.cursor += text_size
-
-
-def del_buffer_text_before_cursor(buffer):
-    if buffer.cursor > 0 and buffer.size > 0:
-        buffer.size -= 1
-        buffer.cursor -= 1
-        del buffer.container[buffer.cursor]
-
-
-def buffer_delete(buffer):
-    if 0 <= buffer.cursor < buffer.size:
-        buffer.size -= 1
-        del buffer.container[buffer.cursor]
-
-
-class Pos:
-    def __init__(self, x, y):
-        self.x = x
-        self.y = y
-
-
-class Buffer:
-    def __init__(self):
-        self.size = 0
-        self.cursor = 0
-        self.container = []
+    if cursor < line.size:
+        render_char(renderer, font, line.chars[cursor], pos, FONT_SCALE)
 
 
 def main():
-    scc(SDL_Init(SDL_INIT_VIDEO))
+    scc(sdl2.SDL_Init(sdl2.SDL_INIT_VIDEO))
     scc(sdl2.sdlimage.IMG_Init(sdl2.sdlimage.IMG_INIT_PNG))
-    window = SDL_CreateWindow(
+    window = sdl2.SDL_CreateWindow(
         b"Sus Editor",
-        SDL_WINDOWPOS_CENTERED,
-        SDL_WINDOWPOS_CENTERED,
+        sdl2.SDL_WINDOWPOS_CENTERED,
+        sdl2.SDL_WINDOWPOS_CENTERED,
         SCREEN_WIDTH,
         SCREEN_HEIGHT,
-        SDL_WINDOW_RESIZABLE,
+        sdl2.SDL_WINDOW_RESIZABLE,
     )
-    renderer = scp(SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED))
+    renderer = scp(
+        sdl2.SDL_CreateRenderer(window, -1, sdl2.SDL_RENDERER_ACCELERATED)
+    )
 
     font = font_load_from_file(renderer, b"charmap-oldschool_white.png")
 
     pos = Pos(0, 0)
-    buffer = Buffer()
+    line = Line()
+    cursor = 0
 
-    while True:
-        event = scp(SDL_Event())
-        if SDL_PollEvent(ctypes.byref(event)) != 0:
-            if event.type == SDL_QUIT:
-                break
+    running = True
+    while running:
+        event = scp(sdl2.SDL_Event())
+        if sdl2.SDL_PollEvent(ctypes.byref(event)) != 0:
+            if event.type == sdl2.SDL_QUIT:
+                running = False
 
-            elif event.type == SDL_KEYDOWN:
-                if event.key.keysym.sym == SDLK_BACKSPACE:
-                    del_buffer_text_before_cursor(buffer)
+            elif event.type == sdl2.SDL_KEYDOWN:
+                if event.key.keysym.sym == sdl2.SDLK_BACKSPACE:
+                    if cursor > 0 and line.size > 0:
+                        cursor -= 1
+                        line_backspace(line, cursor)
 
-                elif event.key.keysym.sym == SDLK_DELETE:
-                    buffer_delete(buffer)
+                elif event.key.keysym.sym == sdl2.SDLK_DELETE:
+                    if cursor >= 0 and cursor < line.size:
+                        line_delete(line, cursor)
 
-                elif event.key.keysym.sym == SDLK_LEFT:
-                    if buffer.cursor > 0:
-                        buffer.cursor -= 1
+                elif event.key.keysym.sym == sdl2.SDLK_LEFT:
+                    if cursor > 0:
+                        cursor -= 1
 
-                elif event.key.keysym.sym == SDLK_RIGHT:
-                    if buffer.cursor < buffer.size:
-                        buffer.cursor += 1
+                elif event.key.keysym.sym == sdl2.SDLK_RIGHT:
+                    if cursor < line.size:
+                        cursor += 1
 
-            elif event.type == SDL_TEXTINPUT:
-                buffer_insert_text_before_cursor(event.text.text, buffer)
+            elif event.type == sdl2.SDL_TEXTINPUT:
+                line_insert_text_before(line, event.text.text, cursor)
+                cursor += len(event.text.text)
 
-            scc(SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0))
-            scc(SDL_RenderClear(renderer))
+            scc(sdl2.SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0))
+            scc(sdl2.SDL_RenderClear(renderer))
 
-            if buffer.size != 0:
-                render_text_sized(
-                    renderer,
-                    font,
-                    buffer.container,
-                    buffer.size,
-                    pos,
-                    0xFFFFFFFF,
-                    FONT_SCALE,
-                )
+            if line.size != 0:
+                render_text_sized(renderer, font, line, pos, FONT_SCALE)
 
-            render_cursor(renderer, font, buffer)
+            render_cursor(renderer, font, cursor, line)
 
-            SDL_RenderPresent(renderer)
+            sdl2.SDL_RenderPresent(renderer)
 
-    SDL_Quit()
+    sdl2.SDL_Quit()
 
 
 main()

@@ -1,0 +1,7 @@
+Sus Editor
+
+Key:
+    Arrows -> Left and Right
+    Delete Key
+    Backspace
+    Only Letters Keyboard input -> Not including F1-F12, Ctrl, Alt, Shift, Caps, Etc
