@@ -65,7 +65,7 @@ def line_backspace(line, col):
         col -= 1
         line.size -= 1
         del line.chars[col]
-        line.cursor = col
+        line.cursor -= 1
 
 
 def line_delete(line, col):
@@ -75,4 +75,3 @@ def line_delete(line, col):
     if 0 <= col < line.size:
         line.size -= 1
         del line.chars[col]
-        line.cursor = col
