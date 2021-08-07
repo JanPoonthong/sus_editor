@@ -5,7 +5,7 @@ class Line:
 
 class Editor:
     lines = Line()
-    size = 0
+    size = 1
     cursor_row = 0
     cursor_col = 0
 
@@ -50,6 +50,7 @@ def editor_delete(editor):
 def editor_push_new_line(editor):
     editor.size += 1
     editor.cursor_row += 1
+    editor.cursor_col = editor.size - editor.size
 
 
 def line_insert_text_before(editor, text):
