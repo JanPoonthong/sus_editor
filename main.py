@@ -123,10 +123,6 @@ def render_text_sized(renderer, font, editor_obj, pos, scale):
         pos.x += FONT_CHAR_WIDTH * scale
 
 
-# def renderer_text(renderer, font, text, pos, color, scale):
-#     render_text_sized(renderer, font, text, len(text), pos, color, scale)
-
-
 def unhex(color):
     # 2 left digits -> R
     r = color >> (8 * 2) & 0xFF
@@ -174,6 +170,7 @@ def render_cursor(renderer, font, editor_obj):
         )
 
 
+pos = Pos(0, 0)
 editor_obj = editor.Editor()
 
 
@@ -194,7 +191,6 @@ def main():
 
     font = font_load_from_file(renderer, b"charmap-oldschool_white.png")
 
-    pos = Pos(0, 0)
     running = True
     while running:
         event = scp(sdl2.SDL_Event())
@@ -234,7 +230,9 @@ def main():
             scc(sdl2.SDL_RenderClear(renderer))
 
             if editor_obj.lines.size != 0:
-                render_text_sized(renderer, font, editor_obj, pos, FONT_SCALE)
+                for row in range(editor_obj.size):
+                    pos = Pos(0, row * FONT_CHAR_HEIGHT * FONT_SCALE)
+                    render_text_sized(renderer, font, editor_obj, pos, FONT_SCALE)
 
             render_cursor(renderer, font, editor_obj)
 
