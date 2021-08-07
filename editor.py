@@ -13,65 +13,61 @@ class Editor:
 
 
 def editor_insert_text_before(editor, text):
-    if editor.cursor_row >= editor.size:
-        if editor.size > 0:
-            editor.cursor_row = editor.size - 1
-        else:
-            editor_push_new_line(editor)
+    # if editor.cursor_row >= editor.size:
+    #     if editor.size > 0:
+    #         editor.cursor_row = editor.size - 1
+    #     else:
+    #         editor_push_new_line(editor)
 
-    line_insert_text_before(
-        editor.lines.chars[editor.cursor_row], text, editor.cursor_col
-    )
+    line_insert_text_before(editor, text)
 
 
 def editor_backspace(editor):
-    if editor.cursor_row >= editor.size:
-        if editor.size > 0:
-            editor.cursor_row = editor.size - 1
-        else:
-            editor_push_new_line(editor)
-    line_backspace(editor.lines.char[editor.cursor_row], editor.cursor_col)
+    # if editor.cursor_row >= editor.size:
+    #     if editor.size > 0:
+    #         editor.cursor_row = editor.size - 1
+    #     else:
+    #         editor_push_new_line(editor)
+    line_backspace(editor)
 
 
 def editor_delete(editor):
-    if editor.cursor_row >= editor.size:
-        if editor.size > 0:
-            editor.cursor_row = editor.size - 1
-        else:
-            editor_push_new_line(editor)
-    line_delete(editor.lines.char[editor.cursor_row], editor.cursor_col)
+    # if editor.cursor_row >= editor.size:
+    #     if editor.size > 0:
+    #         editor.cursor_row = editor.size - 1
+    #     else:
+    #         editor_push_new_line(editor)
+    line_delete(editor)
 
 
 def editor_push_new_line(editor):
     pass
 
 
-def line_insert_text_before(line, text, col):
-    if col > line.size:
-        col = line.size
+def line_insert_text_before(editor, text):
+    # if col > line.size:
+    #     col = line.size
 
     text_size = len(text)
-    line.chars.insert(col, text)
-    line.size += text_size
-    col += text_size
-    line.cursor = col
+    editor.lines.chars.insert(editor.cursor_col, text)
+    editor.lines.size += text_size
+    editor.cursor_col += text_size
 
 
-def line_backspace(line, col):
-    if col > line.size:
-        col = line.size
+def line_backspace(editor):
+    # if col > line.size:
+    #     col = line.size
 
-    if col > 0 and line.size > 0:
-        col -= 1
-        line.size -= 1
-        del line.chars[col]
-        line.cursor -= 1
+    if editor.cursor_col > 0 and editor.lines.size > 0:
+        editor.cursor_col -= 1
+        editor.lines.size -= 1
+        del editor.lines.chars[editor.cursor_col]
 
 
-def line_delete(line, col):
-    if col > line.size:
-        col = line.size
+def line_delete(editor):
+    if editor.cursor_col > editor.lines.size:
+        editor.cursor_col = editor.lines.size
 
-    if 0 <= col < line.size:
-        line.size -= 1
-        del line.chars[col]
+    if 0 <= editor.cursor_col < editor.lines.size:
+        editor.lines.size -= 1
+        del editor.lines.chars[editor.cursor_col]
