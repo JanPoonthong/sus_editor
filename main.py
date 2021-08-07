@@ -108,9 +108,9 @@ def render_char(renderer, font, c: ord, pos, scale):
     )
 
 
-def render_text_sized(renderer, font, editor_obj, pos, scale):
-    text = editor_obj.lines.chars
-    text_size = editor_obj.lines.size
+def render_text_sized(row, renderer, font, editor_obj, pos, scale):
+    text = editor_obj.lines[row].chars
+    text_size = editor_obj.lines[row].size
     color = 0xFFFFFFFF
 
     set_texture_color(font.sprite_sheet, color)
@@ -211,7 +211,7 @@ def main():
                         editor_obj.cursor_col -= 1
 
                 elif event.key.keysym.sym == sdl2.SDLK_RIGHT:
-                    if editor_obj.cursor_col < editor_obj.lines.size:
+                    if editor_obj.cursor_col < editor_obj.lines[editor_obj.current_line].size:
                         editor_obj.cursor_col += 1
 
                 elif event.key.keysym.sym == sdl2.SDLK_UP:
@@ -227,10 +227,10 @@ def main():
             scc(sdl2.SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0))
             scc(sdl2.SDL_RenderClear(renderer))
 
-            if editor_obj.lines.size != 0:
+            if any(l.size != 0 for l in editor_obj.lines):
                 for row in range(editor_obj.size):
                     pos = Pos(0, row * FONT_CHAR_HEIGHT * FONT_SCALE)
-                    render_text_sized(renderer, font, editor_obj, pos, FONT_SCALE)
+                    render_text_sized(row, renderer, font, editor_obj, pos, FONT_SCALE)
 
             render_cursor(renderer, font, editor_obj)
 
