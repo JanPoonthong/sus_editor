@@ -123,10 +123,6 @@ def render_text_sized(renderer, font, line, pos, scale):
         pos.x += FONT_CHAR_WIDTH * scale
 
 
-# def renderer_text(renderer, font, text, pos, color, scale):
-#     render_text_sized(renderer, font, text, len(text), pos, color, scale)
-
-
 def unhex(color):
     # 2 left digits -> R
     r = color >> (8 * 2) & 0xFF
