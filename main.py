@@ -19,8 +19,6 @@ ASCII_DISPLAY_HIGH = 127
 SCREEN_WIDTH = 800
 SCREEN_HEIGHT = 600
 
-BUFFER_CAPACITY = 1024
-
 
 class Font:
     sprite_sheet = sdl2.SDL_Texture()
