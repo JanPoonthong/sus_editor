@@ -90,7 +90,7 @@ def font_load_from_file(renderer, file_path):
     return font
 
 
-def render_char(renderer, font, c, pos, scale):
+def render_char(renderer, font, c: ord, pos, scale):
     dst = sdl2.SDL_Rect(
         x=int(pos.x),
         y=int(pos.y),
@@ -110,9 +110,9 @@ def render_char(renderer, font, c, pos, scale):
     )
 
 
-def render_text_sized(renderer, font, line, pos, scale):
-    text = line.chars
-    text_size = line.size
+def render_text_sized(renderer, font, editor_obj, pos, scale):
+    text = editor_obj.lines.chars
+    text_size = editor_obj.lines.size
     color = 0xFFFFFFFF
 
     set_texture_color(font.sprite_sheet, color)
@@ -145,8 +145,8 @@ def set_texture_color(texture, color):
     scc(sdl2.SDL_SetTextureAlphaMod(texture, a))
 
 
-def render_cursor(renderer, font, cursor, line):
-    pos = Pos(cursor * FONT_CHAR_WIDTH * FONT_SCALE, 0)
+def render_cursor(renderer, font, editor_obj):
+    pos = Pos(editor_obj.cursor_col * FONT_CHAR_WIDTH * FONT_SCALE, 0)
     cursor_rect = sdl2.SDL_Rect(
         x=int(pos.x),
         y=int(pos.y),
@@ -160,9 +160,17 @@ def render_cursor(renderer, font, cursor, line):
 
     set_texture_color(font.sprite_sheet, 0xFF000000)
 
-    if cursor < line.size:
-        render_char(renderer, font, line.chars[cursor], pos, FONT_SCALE)
+    if editor_obj.cursor_col < editor_obj.lines.size:
+        render_char(
+            renderer,
+            font,
+            editor_obj.lines.chars[editor_obj.cursor_col],
+            pos,
+            FONT_SCALE,
+        )
 
+pos = Pos(0, 0)
+editor_obj = editor.Editor()
 
 def main():
     scc(sdl2.SDL_Init(sdl2.SDL_INIT_VIDEO))
@@ -181,10 +189,6 @@ def main():
 
     font = font_load_from_file(renderer, b"charmap-oldschool_white.png")
 
-    pos = Pos(0, 0)
-    line = editor.Line()
-    editor_obj = editor.Editor()
-
     running = True
     while running:
         event = scp(sdl2.SDL_Event())
@@ -194,32 +198,36 @@ def main():
 
             elif event.type == sdl2.SDL_KEYDOWN:
                 if event.key.keysym.sym == sdl2.SDLK_BACKSPACE:
-                    editor.line_backspace(line, line.cursor)
+                    editor.editor_backspace(editor_obj)
 
                 elif event.key.keysym.sym == sdl2.SDLK_DELETE:
-                    editor.line_delete(line, line.cursor)
+                    editor.editor_delete(editor_obj)
 
                 elif event.key.keysym.sym == sdl2.SDLK_LEFT:
-                    if line.cursor > 0:
-                        line.cursor -= 1
+                    if editor_obj.cursor_col > 0:
+                        editor_obj.cursor_col -= 1
 
                 elif event.key.keysym.sym == sdl2.SDLK_RIGHT:
-                    if line.cursor < line.size:
-                        line.cursor += 1
+                    if editor_obj.cursor_col < editor_obj.lines.size:
+                        editor_obj.cursor_col += 1
+
+                elif event.key.keysym.sym == sdl2.SDLK_UP:
+                    if editor_obj.cursor_row > 0:
+                        editor_obj.cursor_row -= 1
+
+                elif event.key.keysym.sym == sdl2.SDLK_DOWN:
+                    editor_obj.cursor_row += 1
 
             elif event.type == sdl2.SDL_TEXTINPUT:
-                editor.line_insert_text_before(
-                    line, event.text.text, line.cursor
-                )
-                # editor.editor_insert_text_before(editor_obj, event.text.text)
+                editor.editor_insert_text_before(editor_obj, event.text.text)
 
             scc(sdl2.SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0))
             scc(sdl2.SDL_RenderClear(renderer))
 
-            if line.size != 0:
-                render_text_sized(renderer, font, line, pos, FONT_SCALE)
+            if editor_obj.lines.size != 0:
+                render_text_sized(renderer, font, editor_obj, pos, FONT_SCALE)
 
-            render_cursor(renderer, font, line.cursor, line)
+            render_cursor(renderer, font, editor_obj)
 
             sdl2.SDL_RenderPresent(renderer)
 
