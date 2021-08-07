@@ -146,7 +146,10 @@ def set_texture_color(texture, color):
 
 
 def render_cursor(renderer, font, editor_obj):
-    pos = Pos(editor_obj.cursor_col * FONT_CHAR_WIDTH * FONT_SCALE, 0)
+    pos = Pos(
+        editor_obj.cursor_col * FONT_CHAR_WIDTH * FONT_SCALE,
+        editor_obj.cursor_row * FONT_CHAR_HEIGHT * FONT_SCALE,
+    )
     cursor_rect = sdl2.SDL_Rect(
         x=int(pos.x),
         y=int(pos.y),
@@ -160,17 +163,19 @@ def render_cursor(renderer, font, editor_obj):
 
     set_texture_color(font.sprite_sheet, 0xFF000000)
 
-    if editor_obj.cursor_col < editor_obj.lines.size:
+    c = editor.editor_char_under_cursor(editor_obj)
+    if c:
         render_char(
             renderer,
             font,
-            editor_obj.lines.chars[editor_obj.cursor_col],
+            c,
             pos,
             FONT_SCALE,
         )
 
-pos = Pos(0, 0)
+
 editor_obj = editor.Editor()
+
 
 def main():
     scc(sdl2.SDL_Init(sdl2.SDL_INIT_VIDEO))
@@ -189,6 +194,7 @@ def main():
 
     font = font_load_from_file(renderer, b"charmap-oldschool_white.png")
 
+    pos = Pos(0, 0)
     running = True
     while running:
         event = scp(sdl2.SDL_Event())
@@ -199,6 +205,9 @@ def main():
             elif event.type == sdl2.SDL_KEYDOWN:
                 if event.key.keysym.sym == sdl2.SDLK_BACKSPACE:
                     editor.editor_backspace(editor_obj)
+
+                elif event.key.keysym.sym == sdl2.SDLK_RETURN:
+                    editor.editor_push_new_line(editor_obj)
 
                 elif event.key.keysym.sym == sdl2.SDLK_DELETE:
                     editor.editor_delete(editor_obj)
