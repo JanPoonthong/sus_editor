@@ -2,7 +2,7 @@
 
 # Quick Start
 
-## Linux
+## Linux/MacOS/Windows
 
 ```console
 $ pip3 install -r requirements.txt
@@ -11,11 +11,13 @@ $ python3 main.py
 
 ## Keys
 
-Arrows -> Left and Right
+Arrows -> Left, Right, Down, Up
 
-Delete Key
+Enter key -> Going to next line
 
-Backspace
+Delete Key -> Deleting character after the cursor
+
+Backspace -> Deleting character before the cursor
 
 Only Letters Keyboard input -> Not including F1-F12, Ctrl, Alt, Shift, Caps, Etc
 
