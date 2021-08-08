@@ -3,6 +3,7 @@ import sys
 
 import sdl2
 import sdl2.sdlimage
+
 import editor
 
 FONT_WIDTH = 128
@@ -88,10 +89,10 @@ def font_load_from_file(renderer, file_path):
     return font
 
 
-def render_char(renderer, font, c: ord, pos, scale):
+def render_char(renderer, font, c: ord, position, scale):
     dst = sdl2.SDL_Rect(
-        x=int(pos.x),
-        y=int(pos.y),
+        x=int(position.x),
+        y=int(position.y),
         w=int(FONT_CHAR_WIDTH * scale),
         h=int(FONT_CHAR_HEIGHT * scale),
     )
@@ -168,10 +169,6 @@ def render_cursor(renderer, font, editor_obj):
         )
 
 
-pos = Pos(0, 0)
-editor_obj = editor.Editor()
-
-
 def main():
     scc(sdl2.SDL_Init(sdl2.SDL_INIT_VIDEO))
     scc(sdl2.sdlimage.IMG_Init(sdl2.sdlimage.IMG_INIT_PNG))
@@ -188,6 +185,7 @@ def main():
     )
 
     font = font_load_from_file(renderer, b"charmap-oldschool_white.png")
+    editor_obj = editor.Editor()
 
     running = True
     while running:
@@ -223,6 +221,8 @@ def main():
 
                 elif event.key.keysym.sym == sdl2.SDLK_DOWN:
                     editor_obj.cursor_row += 1
+                    editor_obj.lines.append(editor.Line())
+                    editor_obj.size += 1
 
             elif event.type == sdl2.SDL_TEXTINPUT:
                 editor.editor_insert_text_before(editor_obj, event.text.text)
@@ -230,7 +230,7 @@ def main():
             scc(sdl2.SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0))
             scc(sdl2.SDL_RenderClear(renderer))
 
-            if any(l.size != 0 for l in editor_obj.lines):
+            if any(_.size != 0 for _ in editor_obj.lines):
                 for row in range(editor_obj.size):
                     pos = Pos(0, row * FONT_CHAR_HEIGHT * FONT_SCALE)
                     render_text_sized(

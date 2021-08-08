@@ -56,6 +56,7 @@ def editor_push_new_line(editor):
 
 
 def line_insert_text_before(editor, text):
+    print(editor.lines, editor.cursor_row)
     if editor.cursor_col > editor.lines[editor.cursor_row].size:
         editor.cursor_col = editor.lines[editor.cursor_row].size
 
