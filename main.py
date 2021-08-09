@@ -230,7 +230,7 @@ def main():
             scc(sdl2.SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0))
             scc(sdl2.SDL_RenderClear(renderer))
 
-            if any(_.size != 0 for _ in editor_obj.lines):
+            if any(i.size != 0 for i in editor_obj.lines):
                 for row in range(editor_obj.size):
                     pos = Pos(0, row * FONT_CHAR_HEIGHT * FONT_SCALE)
                     render_text_sized(
