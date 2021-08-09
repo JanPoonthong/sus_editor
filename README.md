@@ -21,6 +21,8 @@ Backspace -> Deleting character before the cursor
 
 Only Letters Keyboard input -> Not including F1-F12, Ctrl, Alt, Shift, Caps, Etc
 
+Saving a file -> via F1
+
 ## Inspire
 
 ded editor: https://github.com/tsoding/ded

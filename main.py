@@ -169,6 +169,17 @@ def render_cursor(renderer, font, editor_obj):
         )
 
 
+def save_file(editor_obj):
+    with open("output", "w") as file:
+        for row in range(editor_obj.size):
+            for col in range(editor_obj.lines[row].size):
+                file.writelines(
+                    editor_obj.lines[row].chars[col].decode("utf-8")
+                )
+            file.write("\n")
+    return "Saved as output"
+
+
 def main():
     scc(sdl2.SDL_Init(sdl2.SDL_INIT_VIDEO))
     scc(sdl2.sdlimage.IMG_Init(sdl2.sdlimage.IMG_INIT_PNG))
@@ -205,7 +216,7 @@ def main():
                     editor.editor_delete(editor_obj)
 
                 elif event.key.keysym.sym == sdl2.SDLK_F1:
-                    print("F1")
+                    print(save_file(editor_obj))
 
                 elif event.key.keysym.sym == sdl2.SDLK_LEFT:
                     if editor_obj.cursor_col > 0:
