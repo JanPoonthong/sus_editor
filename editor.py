@@ -52,7 +52,7 @@ def editor_push_new_line(editor):
     editor.size += 1
     editor.cursor_row += 1
     editor.cursor_col = 0
-    editor.lines.append(Line())
+    editor.lines.insert(editor.cursor_row, Line())
 
 
 def line_insert_text_before(editor, text):

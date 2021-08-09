@@ -204,6 +204,9 @@ def main():
                 elif event.key.keysym.sym == sdl2.SDLK_DELETE:
                     editor.editor_delete(editor_obj)
 
+                elif event.key.keysym.sym == sdl2.SDLK_F1:
+                    print("F1")
+
                 elif event.key.keysym.sym == sdl2.SDLK_LEFT:
                     if editor_obj.cursor_col > 0:
                         editor_obj.cursor_col -= 1
