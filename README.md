@@ -19,9 +19,9 @@ Delete Key -> Deleting character after the cursor
 
 Backspace -> Deleting character before the cursor
 
-Only Letters Keyboard input -> Not including F1-F12, Ctrl, Alt, Shift, Caps, Etc
-
 Saving a file -> via F1
+
+Only Letters Keyboard input -> Not including F2-F12, Ctrl, Alt, Shift, Caps, Etc
 
 ## Inspire
 
