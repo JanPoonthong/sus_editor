@@ -177,7 +177,41 @@ def save_file(editor_obj):
                     editor_obj.lines[row].chars[col].decode("utf-8")
                 )
             file.write("\n")
-    return "Saved as output"
+    print("Saved as output")
+
+
+def left_arrow(editor_obj):
+    if editor_obj.cursor_col > 0:
+        editor_obj.cursor_col -= 1
+
+def right_arrow(editor_obj):
+    if editor_obj.cursor_col < editor_obj.lines[editor_obj.cursor_row].size:
+        editor_obj.cursor_col += 1
+
+def down_arrow(editor_obj):
+    editor_obj.cursor_row += 1
+    editor_obj.lines.append(editor.Line())
+    editor_obj.size += 1
+
+def up_arrow(editor_obj):
+    if editor_obj.cursor_row > 0:
+        editor_obj.cursor_row -= 1
+
+
+def main_renderer(renderer, editor_obj, font):
+    scc(sdl2.SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0))
+    scc(sdl2.SDL_RenderClear(renderer))
+
+    if any(i.size != 0 for i in editor_obj.lines):
+        for row in range(editor_obj.size):
+            pos = Pos(0, row * FONT_CHAR_HEIGHT * FONT_SCALE)
+            render_text_sized(
+                row, renderer, font, editor_obj, pos, FONT_SCALE
+            )
+
+    render_cursor(renderer, font, editor_obj)
+
+    sdl2.SDL_RenderPresent(renderer)
 
 
 def main():
@@ -216,44 +250,24 @@ def main():
                     editor.editor_delete(editor_obj)
 
                 elif event.key.keysym.sym == sdl2.SDLK_F1:
-                    print(save_file(editor_obj))
+                    save_file(editor_obj)
 
                 elif event.key.keysym.sym == sdl2.SDLK_LEFT:
-                    if editor_obj.cursor_col > 0:
-                        editor_obj.cursor_col -= 1
+                    left_arrow(editor_obj)
 
                 elif event.key.keysym.sym == sdl2.SDLK_RIGHT:
-                    if (
-                        editor_obj.cursor_col
-                        < editor_obj.lines[editor_obj.cursor_row].size
-                    ):
-                        editor_obj.cursor_col += 1
+                    right_arrow(editor_obj)
 
                 elif event.key.keysym.sym == sdl2.SDLK_UP:
-                    if editor_obj.cursor_row > 0:
-                        editor_obj.cursor_row -= 1
+                    up_arrow(editor_obj)
 
                 elif event.key.keysym.sym == sdl2.SDLK_DOWN:
-                    editor_obj.cursor_row += 1
-                    editor_obj.lines.append(editor.Line())
-                    editor_obj.size += 1
+                    down_arrow(editor_obj)
 
             elif event.type == sdl2.SDL_TEXTINPUT:
                 editor.editor_insert_text_before(editor_obj, event.text.text)
 
-            scc(sdl2.SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0))
-            scc(sdl2.SDL_RenderClear(renderer))
-
-            if any(i.size != 0 for i in editor_obj.lines):
-                for row in range(editor_obj.size):
-                    pos = Pos(0, row * FONT_CHAR_HEIGHT * FONT_SCALE)
-                    render_text_sized(
-                        row, renderer, font, editor_obj, pos, FONT_SCALE
-                    )
-
-            render_cursor(renderer, font, editor_obj)
-
-            sdl2.SDL_RenderPresent(renderer)
+            main_renderer(renderer, editor_obj, font)
 
     sdl2.SDL_Quit()
 

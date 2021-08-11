@@ -72,6 +72,8 @@ def line_backspace(editor):
     if editor.cursor_col == 0 and editor.lines[editor.cursor_row].size == 0:
         if editor.cursor_row > 0:
             editor.cursor_row -= 1
+            # editor.size -= 1
+            # del editor.lines[editor.cursor_row]
         # editor.cursor_col = editor.lines[editor.cursor_row].size + 1
 
     if editor.cursor_col > 0 and editor.lines[editor.cursor_row].size > 0:
