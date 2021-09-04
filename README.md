@@ -2,7 +2,7 @@
 
 # Quick Start
 
-## Linux/MacOS/Windows
+## Linux / MacOS / Windows
 
 ```console
 $ pip3 install -r requirements.txt
