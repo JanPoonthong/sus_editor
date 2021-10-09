@@ -184,14 +184,17 @@ def left_arrow(editor_obj):
     if editor_obj.cursor_col > 0:
         editor_obj.cursor_col -= 1
 
+
 def right_arrow(editor_obj):
     if editor_obj.cursor_col < editor_obj.lines[editor_obj.cursor_row].size:
         editor_obj.cursor_col += 1
+
 
 def down_arrow(editor_obj):
     editor_obj.cursor_row += 1
     editor_obj.lines.append(editor.Line())
     editor_obj.size += 1
+
 
 def up_arrow(editor_obj):
     if editor_obj.cursor_row > 0:
@@ -205,9 +208,7 @@ def main_renderer(renderer, editor_obj, font):
     if any(i.size != 0 for i in editor_obj.lines):
         for row in range(editor_obj.size):
             pos = Pos(0, row * FONT_CHAR_HEIGHT * FONT_SCALE)
-            render_text_sized(
-                row, renderer, font, editor_obj, pos, FONT_SCALE
-            )
+            render_text_sized(row, renderer, font, editor_obj, pos, FONT_SCALE)
 
     render_cursor(renderer, font, editor_obj)
 
