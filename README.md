@@ -1,5 +1,9 @@
 # Sus Editor
 
+# Preview
+
+![Demonstration of Sus Editor](sus_editor.gif)
+
 # Quick Start
 
 ## Linux / MacOS / Windows
