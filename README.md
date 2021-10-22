@@ -23,7 +23,7 @@ Delete Key -> Deleting character after the cursor
 
 Backspace -> Deleting character before the cursor
 
-Saving a file -> via F1
+Saving a file -> F1
 
 Only Letters Keyboard input -> Not including F2-F12, Ctrl, Alt, Shift, Caps, Etc
 
